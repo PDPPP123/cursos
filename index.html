@@ -518,7 +518,7 @@ body.com-player .toast { bottom: calc(var(--sab) + 20px); }
 </div>
 
 <!-- Entradas de arquivo -->
-<input type="file" id="inp-zip" class="oculto-visual" accept=".zip,application/zip,application/x-zip-compressed" multiple>
+<input type="file" id="inp-zip" class="oculto-visual" accept=".zip,.mp4,.m4v,.mov,.webm,.jpg,.jpeg,.png,application/zip,application/x-zip-compressed" multiple>
 <input type="file" id="inp-pasta" class="oculto-visual" webkitdirectory multiple>
 <input type="file" id="inp-json" class="oculto-visual" accept=".json,application/json">
 
@@ -1357,7 +1357,7 @@ async function telaInicio(token) {
       <p>Assista às suas aulas como uma série, sem internet. Tudo fica guardado neste aparelho.</p>
       <ol class="passos">
         <li><b>1</b><div><strong>Um zip por curso</strong>O nome do zip vira o nome do curso. Subpastas viram módulos.</div></li>
-        <li><b>2</b><div><strong>Importe</strong>Toque em Importar e escolha o zip no app Arquivos.</div></li>
+        <li><b>2</b><div><strong>Importe</strong>Toque em Importar e escolha os vídeos (ou um zip) no app Arquivos. Dá para selecionar todos de uma vez.</div></li>
         <li><b>3</b><div><strong>Maratone</strong>O app lembra onde você parou e já emenda o próximo episódio.</div></li>
       </ol>
       <button class="btn btn-verm" data-acao="importar">${ICONE.mais}Importar curso</button>
@@ -1962,8 +1962,31 @@ function criarWorker() {
 }
 
 const Importador = {
-  async deZips(files) {
+  // Aceita zips e também vídeos soltos (sem precisar criar zip)
+  async deArquivos(files) {
+    const zips = files.filter((f) => /\.zip$/i.test(f.name));
+    const soltos = files.filter((f) => !/\.zip$/i.test(f.name));
     const planos = [], erros = [];
+    if (soltos.length) {
+      const videos = soltos.filter((f) => EXT_VIDEO[extensao(f.name)]);
+      if (!videos.length) erros.push('Nenhum vídeo compatível entre os arquivos escolhidos (MP4, M4V, MOV ou WEBM).');
+      else {
+        const existentes = (await DB.todos('cursos')).map((c) => c.nome).sort(colator.compare);
+        const nome = await pedirNome({
+          titulo: `Nome do curso (${plural(videos.length, 'vídeo', 'vídeos')})`,
+          placeholder: 'Ex.: React Native', rotuloOk: 'Importar',
+          dica: existentes.length
+            ? `Para adicionar a um curso que já existe, use o mesmo nome: ${existentes.slice(0, 6).map((n) => `<b>${esc(n)}</b>`).join(', ')}.`
+            : 'A ordem dos episódios segue o número no início do nome de cada arquivo.'
+        });
+        if (!nome) return;
+        planos.push(planejar(nome, soltos.map((f) => ({ caminho: f.name, tamanho: f.size, data: f.lastModified, fonte: { tipo: 'arquivo', file: f } }))));
+      }
+    }
+    await this.deZips(zips, planos, erros);
+  },
+
+  async deZips(files, planos = [], erros = []) {
     for (const f of files) {
       if (!/\.zip$/i.test(f.name)) { erros.push(`${f.name}: não é um arquivo .zip`); continue; }
       try {
@@ -2192,7 +2215,7 @@ async function menuImportar() {
   const escolha = await dialogo({
     titulo: 'Importar curso',
     html: `<div class="escolha">
-      <button data-valor="zip"><span>${ICONE.zip}</span><div><b>Arquivos .zip</b><small>Um zip por curso. Pode escolher vários.</small></div></button>
+      <button data-valor="zip"><span>${ICONE.zip}</span><div><b>Vídeos ou zips</b><small>Selecione os vídeos do curso (ou zips, um por curso).</small></div></button>
       <button data-valor="pasta"><span>${ICONE.pasta}</span><div><b>Pasta</b><small>Uma pasta com os vídeos do curso.</small></div></button>
     </div><p style="margin:14px 0 0;font-size:13px">Dica: você também pode arrastar os zips para esta janela.</p>`,
     botoes: [{ rotulo: 'Cancelar', valor: null }]
@@ -2219,26 +2242,30 @@ async function apagarCurso(id) {
   if (lerRota().rota === 'curso') location.replace('#/'); else rerenderizar();
 }
 
+// Caixa com campo de texto; devolve o texto digitado ou null se cancelar
+function pedirNome({ titulo, valor = '', dica = '', placeholder = '', rotuloOk = 'Salvar' }) {
+  return new Promise((resolve) => {
+    const m = abrirModal(`<h2>${esc(titulo)}</h2>
+      <div class="modal-corpo">
+        <input id="campo-nome" class="campo" maxlength="80" value="${esc(valor)}" placeholder="${esc(placeholder)}" autocomplete="off" enterkeyhint="done">
+        ${dica ? `<p style="margin-top:10px;font-size:13px">${dica}</p>` : ''}
+      </div>
+      <div class="modal-botoes"><button class="btn btn-sec" data-r="0">Cancelar</button><button class="btn btn-primario" data-r="1">${esc(rotuloOk)}</button></div>`);
+    const campo = $('#campo-nome', m.el);
+    setTimeout(() => { campo.focus(); campo.select(); }, 50);
+    const fim = (v) => { m.fechar(); resolve(v); };
+    const ok = () => { const nome = campo.value.replace(/\s+/g, ' ').trim(); if (!nome) { campo.focus(); return; } fim(nome); };
+    m.el.addEventListener('click', (e) => { const b = e.target.closest('[data-r]'); if (!b) return; if (b.dataset.r === '1') ok(); else fim(null); });
+    campo.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); ok(); } });
+    m.fundo.addEventListener('fechar', () => fim(null));
+  });
+}
+
 async function renomearCurso(id) {
   const curso = await DB.get('cursos', id);
   if (!curso) return;
-  const m = abrirModal(`<h2>Renomear curso</h2>
-    <div class="modal-corpo">
-      <input id="novo-nome" class="campo" maxlength="80" value="${esc(curso.nome)}" autocomplete="off" enterkeyhint="done">
-      <p style="margin-top:10px;font-size:13px">Para levar o progresso para outro aparelho, use o mesmo nome lá.</p>
-    </div>
-    <div class="modal-botoes"><button class="btn btn-sec" data-r="0">Cancelar</button><button class="btn btn-primario" data-r="1">Salvar</button></div>`);
-  const campo = $('#novo-nome', m.el);
-  setTimeout(() => { campo.focus(); campo.select(); }, 50);
-  const salvar = async () => {
-    const nome = campo.value.replace(/\s+/g, ' ').trim();
-    if (!nome) { campo.focus(); return; }
-    m.fechar();
-    if (nome !== curso.nome) { curso.nome = nome; await DB.put('cursos', curso); toast('Curso renomeado'); rerenderizar(); }
-  };
-  m.el.addEventListener('click', (e) => { const b = e.target.closest('[data-r]'); if (!b) return; if (b.dataset.r === '1') salvar(); else m.fechar(); });
-  campo.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); salvar(); } });
-  m.fundo.addEventListener('fechar', () => m.fechar());
+  const nome = await pedirNome({ titulo: 'Renomear curso', valor: curso.nome, dica: 'Para levar o progresso para outro aparelho, use o mesmo nome lá.' });
+  if (nome && nome !== curso.nome) { curso.nome = nome; await DB.put('cursos', curso); toast('Curso renomeado'); rerenderizar(); }
 }
 
 async function apagarModulo(cursoId, modulo) {
@@ -2393,7 +2420,7 @@ document.addEventListener('click', async (e) => {
 $('#inp-zip').addEventListener('change', async (e) => {
   const files = [...e.target.files];
   e.target.value = '';
-  if (files.length) await Importador.deZips(files);
+  if (files.length) await Importador.deArquivos(files);
 });
 $('#inp-pasta').addEventListener('change', async (e) => {
   const files = [...e.target.files];
@@ -2428,7 +2455,7 @@ let contadorArraste = 0;
 window.addEventListener('dragenter', (e) => {
   if (!e.dataTransfer?.types?.includes('Files') || importando) return;
   contadorArraste++;
-  if (!$('.soltar')) { const d = document.createElement('div'); d.className = 'soltar'; d.textContent = 'Solte os arquivos .zip para importar'; document.body.appendChild(d); }
+  if (!$('.soltar')) { const d = document.createElement('div'); d.className = 'soltar'; d.textContent = 'Solte os vídeos ou zips para importar'; document.body.appendChild(d); }
 });
 window.addEventListener('dragleave', () => { if (--contadorArraste <= 0) { contadorArraste = 0; $('.soltar')?.remove(); } });
 window.addEventListener('dragover', (e) => { if (e.dataTransfer?.types?.includes('Files')) e.preventDefault(); });
@@ -2436,8 +2463,8 @@ window.addEventListener('drop', (e) => {
   e.preventDefault();
   contadorArraste = 0; $('.soltar')?.remove();
   if (importando) return;
-  const zips = [...(e.dataTransfer?.files || [])].filter((f) => /\.zip$/i.test(f.name));
-  if (zips.length) Importador.deZips(zips); else toast('Solte arquivos .zip');
+  const arquivos = [...(e.dataTransfer?.files || [])].filter((f) => /\.zip$/i.test(f.name) || EXT_VIDEO[extensao(f.name)] || EXT_IMG[extensao(f.name)]);
+  if (arquivos.length) Importador.deArquivos(arquivos); else toast('Solte vídeos ou arquivos .zip');
 });
 
 window.addEventListener('beforeunload', (e) => { if (importando) { e.preventDefault(); e.returnValue = ''; } });

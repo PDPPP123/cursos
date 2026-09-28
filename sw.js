@@ -1,6 +1,6 @@
 // Service worker do app Cursos: cache-first para funcionar 100% offline.
 // Ao publicar uma nova versão, aumente o número abaixo para o cache ser renovado.
-const VERSAO = 'cursos-v1';
+const VERSAO = 'cursos-v2';
 const ARQUIVOS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 // Instalação: guarda os arquivos do app
