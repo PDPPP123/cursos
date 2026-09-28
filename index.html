@@ -1,0 +1,2479 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#141414">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Seus cursos em vídeo, offline, no estilo Netflix.">
+<!-- iOS: abre em tela cheia quando instalado na Tela de Início -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cursos">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Cursos</title>
+<style>
+/* ===================== Tokens ===================== */
+:root {
+  --bg: #141414;
+  --bg-elev: #1b1b1b;
+  --bg-card: #202020;
+  --bg-hover: #2a2a2a;
+  --linha: rgba(255,255,255,.08);
+  --txt: #f2f2f2;
+  --txt2: #b3b3b3;
+  --txt3: #808080;
+  --verm: #e50914;
+  --verm-claro: #ff3b44;
+  --verm-escuro: #b20710;
+  --ok: #46d369;
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --gut: 16px;
+  --pl: calc(var(--gut) + var(--sal));
+  --pr: calc(var(--gut) + var(--sar));
+  --topo-h: 56px;
+  --abas-h: 58px;
+  --raio: 8px;
+  --sombra: 0 10px 30px rgba(0,0,0,.45);
+  --fonte: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+@media (min-width: 900px) { :root { --gut: 48px; --abas-h: 0px; } }
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg); color: var(--txt); }
+body {
+  font-family: var(--fonte); font-size: 16px; line-height: 1.4;
+  -webkit-text-size-adjust: 100%; -webkit-font-smoothing: antialiased;
+  min-height: 100vh; min-height: 100dvh; overflow-x: hidden;
+}
+body.com-player, body.com-modal { overflow: hidden; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+button:disabled { opacity: .35; cursor: default; }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3 { margin: 0; line-height: 1.12; letter-spacing: -.01em; }
+svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 4px; }
+.oculto-visual { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.video-oculto { position: fixed; left: -20px; top: -20px; width: 4px; height: 4px; opacity: 0; pointer-events: none; }
+[hidden] { display: none !important; }
+
+/* ===================== Botões ===================== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 46px; padding: 0 22px; border-radius: var(--raio);
+  font-weight: 700; font-size: 16px; background: rgba(109,109,110,.55); color: #fff;
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  transition: background .15s, transform .1s; white-space: nowrap;
+}
+.btn:active { transform: scale(.97); }
+.btn:hover { background: rgba(109,109,110,.4); }
+.btn svg { width: 22px; height: 22px; }
+.btn-primario { background: #fff; color: #000; }
+.btn-primario:hover { background: rgba(255,255,255,.82); }
+.btn-verm { background: var(--verm); }
+.btn-verm:hover { background: var(--verm-escuro); }
+.btn-perigo { background: transparent; color: #ff7a7a; border: 1px solid rgba(255,90,90,.35); }
+.btn-perigo:hover { background: rgba(255,60,60,.08); }
+.btn-sec { background: var(--bg-card); border: 1px solid var(--linha); }
+.btn-sec:hover { background: var(--bg-hover); }
+.btn-peq { min-height: 38px; padding: 0 14px; font-size: 14px; }
+.btn-peq svg { width: 18px; height: 18px; }
+.icone {
+  display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  color: var(--txt); transition: background .15s;
+}
+.icone:hover { background: rgba(255,255,255,.1); }
+.chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px 0; }
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  flex: none; min-height: 34px; padding: 0 14px; border-radius: 17px; font-size: 14px; font-weight: 600;
+  border: 1px solid rgba(255,255,255,.22); color: var(--txt2); transition: all .15s;
+}
+.chip:hover { color: #fff; border-color: rgba(255,255,255,.5); }
+.chip.ativo { background: #fff; color: #000; border-color: #fff; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--txt2); }
+.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--verm); box-shadow: 0 0 10px var(--verm); }
+
+/* ===================== Marca ===================== */
+.marca { display: inline-flex; align-items: center; gap: 9px; font-weight: 800; font-size: 22px; letter-spacing: -.02em; }
+.marca-icone {
+  width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center;
+  background: linear-gradient(145deg, var(--verm-claro), var(--verm) 55%, var(--verm-escuro));
+  box-shadow: 0 4px 14px rgba(229,9,20,.45), inset 0 1px 0 rgba(255,255,255,.25);
+}
+.marca-icone svg { width: 14px; height: 14px; margin-left: 2px; fill: #fff; stroke: none; }
+
+/* ===================== Cabeçalho ===================== */
+.topo {
+  position: fixed; inset: 0 0 auto 0; z-index: 20; height: calc(var(--topo-h) + var(--sat));
+  display: flex; align-items: center; gap: 6px;
+  padding: var(--sat) var(--pr) 0 var(--pl);
+  background: linear-gradient(to bottom, rgba(0,0,0,.72), rgba(0,0,0,0));
+  transition: background .25s;
+}
+.topo.solido { background: rgba(20,20,20,.92); -webkit-backdrop-filter: saturate(160%) blur(16px); backdrop-filter: saturate(160%) blur(16px); box-shadow: 0 1px 0 var(--linha); }
+.topo .voltar { margin-left: -10px; }
+.nav-topo { display: none; gap: 22px; margin-left: 36px; font-size: 15px; }
+.nav-topo a { color: var(--txt2); transition: color .15s; }
+.nav-topo a:hover { color: #fff; }
+.nav-topo a.ativo { color: #fff; font-weight: 700; }
+.topo-dir { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.btn-importar-topo { display: none; }
+@media (min-width: 900px) {
+  .nav-topo { display: flex; }
+  .btn-importar-topo { display: inline-flex; }
+}
+
+/* ===================== Abas inferiores (celular) ===================== */
+.abas {
+  position: fixed; inset: auto 0 0 0; z-index: 25;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  height: calc(var(--abas-h) + var(--sab)); padding: 0 var(--sar) var(--sab) var(--sal);
+  background: rgba(18,18,18,.9); -webkit-backdrop-filter: saturate(160%) blur(18px); backdrop-filter: saturate(160%) blur(18px);
+  border-top: 1px solid var(--linha);
+}
+.aba { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10.5px; font-weight: 600; color: var(--txt3); }
+.aba svg { width: 24px; height: 24px; }
+.aba.ativo { color: #fff; }
+.aba-importar span.circ {
+  width: 40px; height: 30px; border-radius: 10px; display: grid; place-items: center; color: #fff;
+  background: linear-gradient(145deg, var(--verm-claro), var(--verm));
+  box-shadow: 0 4px 14px rgba(229,9,20,.4);
+}
+.aba-importar span.circ svg { width: 20px; height: 20px; stroke-width: 2.6; }
+.aba-importar { color: var(--txt2); }
+@media (min-width: 900px) { .abas { display: none; } }
+
+/* ===================== Estrutura ===================== */
+#app { padding-bottom: calc(var(--abas-h) + var(--sab) + 36px); min-height: 100vh; }
+.pagina { padding: calc(var(--sat) + var(--topo-h) + 16px) var(--pr) 0 var(--pl); max-width: 1100px; margin: 0 auto; }
+.pagina-titulo { font-size: 32px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 18px; }
+.secao { margin: 26px 0 6px; position: relative; }
+.secao-cab { display: flex; align-items: baseline; gap: 10px; padding: 0 var(--pr) 10px var(--pl); }
+.secao-cab h2 { font-size: 19px; font-weight: 700; }
+.secao-cab span { font-size: 14px; color: var(--txt3); }
+.secao-cab a { margin-left: auto; font-size: 14px; color: var(--txt2); font-weight: 600; }
+
+/* ===================== Hero ===================== */
+.hero { position: relative; min-height: 72vh; min-height: 72svh; display: flex; align-items: flex-end; }
+@media (min-width: 900px) { .hero { min-height: 78vh; } }
+.hero-fundo { position: absolute; inset: 0; overflow: hidden; }
+.hero-fundo > .capa { position: absolute; inset: 0; border-radius: 0; transform: scale(1.02); }
+.hero-fundo::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    linear-gradient(to top, var(--bg) 0%, rgba(20,20,20,.86) 22%, rgba(20,20,20,.35) 55%, rgba(20,20,20,.1) 75%, rgba(0,0,0,.55) 100%),
+    linear-gradient(to right, rgba(20,20,20,.75) 0%, rgba(20,20,20,.1) 60%);
+}
+.hero-conteudo { position: relative; padding: 0 var(--pr) 26px var(--pl); width: 100%; max-width: 720px; }
+.hero h1 { font-size: clamp(34px, 9vw, 64px); font-weight: 900; letter-spacing: -.03em; margin: 10px 0 10px; text-shadow: 0 2px 20px rgba(0,0,0,.45); }
+.hero-ep { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.hero-ep b { color: var(--txt2); font-weight: 700; margin-right: 6px; }
+.hero-meta { color: var(--txt2); font-size: 14px; margin-bottom: 14px; }
+.hero-progresso { display: flex; align-items: center; gap: 10px; max-width: 340px; margin-bottom: 18px; font-size: 13px; color: var(--txt2); }
+.hero-progresso .barra { flex: 1; }
+.hero-botoes { display: flex; gap: 10px; flex-wrap: wrap; }
+.hero-botoes .btn { flex: 1 1 auto; max-width: 220px; }
+@media (min-width: 900px) { .hero-botoes .btn { flex: none; } }
+
+/* ===================== Fileiras ===================== */
+.fileira-wrap { position: relative; }
+.fileira {
+  display: flex; gap: 10px; overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory; scroll-padding-left: var(--pl);
+  padding: 4px var(--pr) 12px var(--pl);
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.fileira::-webkit-scrollbar { display: none; }
+.seta {
+  display: none; position: absolute; top: 4px; height: var(--seta-h, 60%); width: calc(var(--gut) - 6px); z-index: 2;
+  background: rgba(20,20,20,.55); color: #fff; font-size: 38px; line-height: 1; border-radius: 4px; transition: background .15s;
+}
+.seta:hover { background: rgba(20,20,20,.8); }
+.seta.esq { left: 0; } .seta.dir { right: 0; }
+@media (hover: hover) and (pointer: fine) {
+  .fileira-wrap:hover .seta { display: grid; place-items: center; }
+  .card:hover .thumb { transform: scale(1.035); box-shadow: var(--sombra); }
+  .card:hover .play-sobre { opacity: 1; }
+}
+.card { flex: 0 0 auto; width: clamp(160px, 46vw, 300px); scroll-snap-align: start; text-align: left; }
+.card.largo { width: clamp(240px, 78vw, 360px); }
+.thumb { position: relative; aspect-ratio: 16 / 9; border-radius: var(--raio); overflow: hidden; background: var(--bg-card); transition: transform .25s, box-shadow .25s; }
+.thumb > .capa { position: absolute; inset: 0; }
+.thumb .barra { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 0; height: 4px; background: rgba(255,255,255,.25); }
+.thumb .barra i { border-radius: 0; }
+.play-sobre {
+  position: absolute; inset: 0; display: grid; place-items: center; opacity: .95; transition: opacity .2s;
+  background: linear-gradient(to top, rgba(0,0,0,.5), transparent 55%);
+}
+.play-sobre span { width: 44px; height: 44px; border-radius: 50%; border: 2px solid rgba(255,255,255,.9); background: rgba(0,0,0,.4); display: grid; place-items: center; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.play-sobre svg { width: 18px; height: 18px; margin-left: 3px; }
+.selo { position: absolute; top: 8px; left: 8px; font-size: 11px; font-weight: 800; letter-spacing: .06em; padding: 3px 7px; border-radius: 4px; background: var(--verm); color: #fff; text-transform: uppercase; }
+.selo.ok { background: var(--ok); color: #06280f; }
+.card-titulo { margin-top: 8px; font-size: 14.5px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card-sub { font-size: 12.5px; color: var(--txt2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-sub b { color: var(--txt); font-weight: 700; }
+
+/* ===================== Capas e miniaturas ===================== */
+.capa { background: var(--bg-card) center / cover no-repeat; }
+.capa.gerada {
+  display: grid; place-items: center; overflow: hidden;
+  background-image: radial-gradient(circle at 22% 12%, hsl(var(--h) 80% 50% / .95), transparent 55%),
+                    linear-gradient(150deg, hsl(calc(var(--h) + 20) 60% 26%), hsl(calc(var(--h) + 50) 55% 9%));
+}
+.capa.gerada .iniciais {
+  font-weight: 900; color: rgba(255,255,255,.93); letter-spacing: -.02em;
+  font-size: clamp(30px, 10vw, 68px); text-shadow: 0 4px 20px rgba(0,0,0,.35);
+}
+.hero-fundo .capa.gerada .iniciais, .curso-fundo .capa.gerada .iniciais { font-size: clamp(90px, 34vw, 260px); opacity: .22; }
+.com-mini { background-size: cover !important; background-position: center !important; }
+.com-mini > .iniciais, .com-mini > .ep-thumb-num { display: none; }
+
+/* ===================== Barras ===================== */
+.barra { height: 4px; background: rgba(255,255,255,.2); border-radius: 2px; overflow: hidden; }
+.barra i { display: block; height: 100%; background: var(--verm); border-radius: 2px; transition: width .3s; }
+.barra.grossa { height: 6px; border-radius: 3px; }
+.barra.ok i { background: var(--ok); }
+
+/* ===================== Tela vazia ===================== */
+.vazio { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: calc(var(--sat) + var(--topo-h) + 20px) var(--pr) calc(var(--abas-h) + var(--sab) + 30px) var(--pl); position: relative; overflow: hidden; }
+.vazio::before {
+  content: ""; position: absolute; width: 900px; height: 900px; left: 50%; top: -380px; transform: translateX(-50%);
+  background: radial-gradient(circle, rgba(229,9,20,.22), transparent 60%); pointer-events: none;
+}
+.vazio-caixa { position: relative; max-width: 480px; text-align: center; }
+.vazio-logo { width: 76px; height: 76px; border-radius: 22px; margin: 0 auto 22px; }
+.vazio-logo svg { width: 32px; height: 32px; }
+.vazio h1 { font-size: clamp(30px, 8vw, 40px); font-weight: 900; letter-spacing: -.03em; margin-bottom: 12px; }
+.vazio > .vazio-caixa > p { color: var(--txt2); margin: 0 0 26px; font-size: 16.5px; }
+.passos { list-style: none; padding: 0; margin: 0 0 28px; text-align: left; display: grid; gap: 10px; }
+.passos li { display: flex; gap: 14px; align-items: flex-start; background: var(--bg-elev); border: 1px solid var(--linha); border-radius: 12px; padding: 14px; }
+.passos b { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: rgba(229,9,20,.15); color: var(--verm-claro); font-size: 14px; }
+.passos div { font-size: 14.5px; color: var(--txt2); }
+.passos div strong { display: block; color: var(--txt); font-size: 15px; margin-bottom: 1px; }
+.aviso { margin: 0 0 16px; padding: 12px 14px; border-radius: 10px; background: #3a2a00; color: #ffd98a; font-size: 14px; text-align: left; }
+.pagina .aviso, .hero + .aviso { margin: 16px var(--pr) 0 var(--pl); }
+
+/* ===================== Biblioteca ===================== */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 22px; }
+.stat { background: var(--bg-elev); border: 1px solid var(--linha); border-radius: 12px; padding: 14px; }
+.stat b { display: block; font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+.stat span { font-size: 12.5px; color: var(--txt2); }
+.grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 18px 12px; margin-top: 16px; }
+@media (min-width: 900px) { .grade { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 26px 16px; } }
+.grade .card { width: auto; }
+.grade .card .barra.solta { margin-top: 8px; }
+.vazio-lista { color: var(--txt2); padding: 30px 0; text-align: center; }
+
+/* ===================== Página do curso ===================== */
+.curso-topo { position: relative; min-height: 58vh; min-height: 58svh; display: flex; align-items: flex-end; }
+.curso-fundo { position: absolute; inset: 0; overflow: hidden; }
+.curso-fundo > .capa { position: absolute; inset: 0; }
+.curso-fundo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, var(--bg) 0%, rgba(20,20,20,.8) 30%, rgba(20,20,20,.3) 65%, rgba(0,0,0,.55)); }
+.curso-info { position: relative; padding: 0 var(--pr) 8px var(--pl); width: 100%; max-width: 1100px; margin: 0 auto; }
+.curso-info h1 { font-size: clamp(32px, 8vw, 56px); font-weight: 900; letter-spacing: -.03em; margin: 10px 0 12px; }
+.metas { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--txt2); font-size: 14px; margin-bottom: 14px; }
+.metas span + span::before { content: "•"; margin-right: 14px; color: var(--txt3); }
+.progresso-curso { display: flex; align-items: center; gap: 12px; max-width: 460px; margin-bottom: 18px; }
+.progresso-curso .barra { flex: 1; }
+.progresso-curso b { font-size: 14px; white-space: nowrap; }
+.curso-acoes { display: flex; flex-direction: column; gap: 10px; max-width: 460px; }
+.curso-acoes .btn { width: 100%; }
+@media (min-width: 900px) { .curso-acoes .btn { width: auto; align-self: flex-start; min-width: 240px; } }
+.prox-ep { font-size: 14px; color: var(--txt2); }
+.prox-ep b { color: var(--txt); }
+.episodios { padding: 18px var(--pr) 0 var(--pl); max-width: 1100px; margin: 0 auto; }
+.episodios-cab { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 8px 0 14px; border-bottom: 1px solid var(--linha); }
+.episodios-cab h2 { font-size: 21px; font-weight: 800; }
+.lista-eps[data-filtro="pendentes"] .ep.assistida, .lista-eps[data-filtro="assistidas"] .ep:not(.assistida) { display: none; }
+.modulo { border-bottom: 1px solid var(--linha); }
+.modulo > summary { list-style: none; display: flex; align-items: center; gap: 12px; padding: 16px 0; cursor: pointer; user-select: none; -webkit-user-select: none; }
+.modulo > summary::-webkit-details-marker { display: none; }
+.seta-mod { color: var(--txt2); transition: transform .2s; }
+.modulo[open] > summary .seta-mod { transform: rotate(90deg); }
+.mod-nome { flex: 1; min-width: 0; font-weight: 700; font-size: 17px; }
+.mod-nome small { display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 13px; color: var(--txt2); margin-top: 4px; }
+.mod-nome small .barra { width: 70px; height: 3px; }
+.gerenciar { margin-top: 34px; padding: 18px; border-radius: 12px; background: var(--bg-elev); border: 1px solid var(--linha); }
+.gerenciar h3 { font-size: 15px; margin-bottom: 4px; }
+.gerenciar p { margin: 0 0 12px; color: var(--txt2); font-size: 14px; }
+
+/* ===================== Episódio (linha) ===================== */
+.ep { display: flex; align-items: center; gap: 4px; border-radius: 10px; padding: 2px; transition: background .15s; }
+.ep:hover { background: var(--bg-elev); }
+.ep.atual { background: #232323; box-shadow: inset 3px 0 0 var(--verm); }
+.ep-play { flex: 1; min-width: 0; display: flex; align-items: center; gap: 14px; padding: 9px 6px; text-align: left; }
+.ep-thumb {
+  position: relative; flex: none; width: 132px; aspect-ratio: 16 / 9; border-radius: 6px; overflow: hidden;
+  display: grid; place-items: center;
+  background: linear-gradient(150deg, hsl(var(--h, 0) 45% 22%), hsl(calc(var(--h, 0) + 40) 45% 10%)) center / cover no-repeat;
+}
+@media (min-width: 900px) { .ep-thumb { width: 176px; } }
+.ep-thumb-num { font-size: 26px; font-weight: 800; color: rgba(255,255,255,.55); }
+.ep-thumb .ep-ico { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; background: rgba(0,0,0,.35); transition: opacity .15s; }
+.ep-thumb .ep-ico svg { width: 30px; height: 30px; filter: drop-shadow(0 2px 6px rgba(0,0,0,.6)); }
+.ep-play:hover .ep-ico, .ep.atual .ep-ico { opacity: 1; }
+.ep-thumb .barra { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; border-radius: 0; background: rgba(255,255,255,.25); }
+.ep-thumb .barra i { border-radius: 0; }
+.ep-dur { position: absolute; right: 5px; bottom: 6px; font-size: 11px; font-weight: 700; background: rgba(0,0,0,.72); padding: 1px 5px; border-radius: 3px; }
+.ep-info { flex: 1; min-width: 0; }
+.ep-titulo { font-size: 15px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.ep-titulo .n { color: var(--txt2); margin-right: 6px; font-variant-numeric: tabular-nums; }
+.ep-meta { font-size: 13px; color: var(--txt3); margin-top: 3px; }
+.ep.assistida .ep-meta { color: var(--ok); }
+.ep-check { color: var(--txt3); }
+.ep-check:hover { color: #fff; }
+.ep.assistida .ep-check { color: var(--ok); }
+
+/* ===================== Ajustes ===================== */
+.cartao { background: var(--bg-elev); border: 1px solid var(--linha); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+.cartao h2 { font-size: 17px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.cartao h2 svg { width: 20px; height: 20px; color: var(--txt2); }
+.cartao p { margin: 0 0 12px; color: var(--txt2); font-size: 14.5px; }
+.cartao .botoes { display: flex; gap: 10px; flex-wrap: wrap; }
+.espaco-num { font-size: 26px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 10px; }
+.espaco-num small { font-size: 14px; font-weight: 500; color: var(--txt2); letter-spacing: 0; }
+.legenda { display: flex; justify-content: space-between; font-size: 13px; color: var(--txt2); margin: 8px 0 14px; }
+.nota { font-size: 13.5px; color: var(--txt2); background: rgba(255,255,255,.04); border-radius: 10px; padding: 12px; margin: 0 0 12px; }
+.nota b { color: var(--txt); }
+.lista-simples { list-style: none; margin: 0; padding: 0; }
+.lista-simples li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--linha); }
+.lista-simples li:first-child { border-top: 0; }
+.lista-simples .mini-capa { width: 64px; aspect-ratio: 16/9; border-radius: 5px; overflow: hidden; position: relative; flex: none; }
+.lista-simples .mini-capa .capa { position: absolute; inset: 0; }
+.lista-simples .mini-capa .iniciais { font-size: 16px !important; }
+.li-txt { flex: 1; min-width: 0; }
+.li-txt div:first-child { font-weight: 600; overflow-wrap: anywhere; }
+.li-txt div + div { font-size: 13px; color: var(--txt2); }
+.diag { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; font-size: 14px; color: var(--txt2); }
+.diag b { color: var(--ok); font-weight: 600; } .diag b.nao { color: #ff8a8a; }
+
+/* ===================== Player ===================== */
+.player { position: fixed; inset: 0; z-index: 40; background: #000; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.player-topo { display: flex; align-items: center; gap: 6px; padding: calc(var(--sat) + 4px) var(--pr) 6px calc(var(--sal) + 6px); background: #000; }
+.player-titulos { min-width: 0; flex: 1; }
+.pl-curso { font-size: 12.5px; color: var(--txt2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pl-aula { font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pl-aula .n { color: var(--txt2); margin-right: 6px; }
+.video-caixa { position: relative; background: #000; max-width: 1280px; margin: 0 auto; }
+.video-caixa video { display: block; width: 100%; aspect-ratio: 16 / 9; max-height: 72vh; max-height: 72svh; background: #000; }
+.player-corpo { background: var(--bg); min-height: 50vh; }
+.player-controles { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 12px var(--pr) 4px var(--pl); max-width: 900px; margin: 0 auto; }
+.player-controles .icone { width: 50px; height: 50px; }
+.player-controles .icone svg { width: 28px; height: 28px; }
+.btn-vel { min-width: 66px; min-height: 40px; padding: 0 12px; border-radius: 20px; border: 1.5px solid rgba(255,255,255,.25); font-weight: 700; font-size: 15px; margin: 0 4px; }
+.btn-vel:hover { border-color: #fff; }
+#pl-concluida.sim { color: var(--ok); }
+.player-extra { max-width: 1100px; margin: 0 auto; padding: 8px var(--pr) calc(var(--sab) + 30px) var(--pl); }
+.pl-prox { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; padding: 12px; margin: 6px 0 18px; border-radius: 12px; background: var(--bg-elev); border: 1px solid var(--linha); }
+.pl-prox:hover { background: var(--bg-hover); }
+.pl-prox .ep-thumb { width: 112px; }
+.pl-prox small { display: block; font-size: 11.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--txt2); margin-bottom: 3px; }
+.pl-prox div.t { font-weight: 700; font-size: 15px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.player-extra h3 { font-size: 18px; font-weight: 800; margin: 8px 0 8px; }
+.player-extra h4 { font-size: 12.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--txt2); margin: 18px 0 6px; }
+.contagem { position: absolute; inset: 0; display: grid; place-items: center; z-index: 3; padding: 16px; background: #000 center / cover no-repeat; }
+.contagem::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,.72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.contagem-caixa { position: relative; text-align: center; max-width: 440px; }
+.contagem-rotulo { color: var(--txt2); font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.contagem-anel { width: 64px; height: 64px; margin: 12px auto 8px; position: relative; display: grid; place-items: center; font-size: 24px; font-weight: 800; }
+.contagem-anel svg { position: absolute; inset: 0; width: 64px; height: 64px; transform: rotate(-90deg); }
+.contagem-anel circle { stroke-width: 4; fill: none; }
+.contagem-anel .fundo-anel { stroke: rgba(255,255,255,.2); }
+.contagem-anel .frente-anel { stroke: #fff; stroke-dasharray: 176; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear; }
+.contagem-titulo { font-size: clamp(16px, 4.5vw, 22px); font-weight: 800; margin: 4px 0 16px; }
+.contagem-botoes { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.pl-erro { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 20px; background: #000; color: #ffb4b4; z-index: 4; }
+@media (orientation: landscape) and (max-height: 520px) {
+  .video-caixa video { max-height: 100vh; max-height: 100svh; height: 100vh; height: 100svh; aspect-ratio: auto; }
+  .player-topo { position: absolute; z-index: 5; inset: 0 0 auto 0; background: linear-gradient(to bottom, rgba(0,0,0,.7), transparent); padding-top: 4px; pointer-events: none; }
+  .player-topo > * { pointer-events: auto; }
+}
+
+/* ===================== Modais e toast ===================== */
+.modal-fundo {
+  position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.72); display: grid; place-items: center;
+  padding: calc(var(--sat) + 16px) var(--pr) calc(var(--sab) + 16px) var(--pl); animation: surgir .15s ease-out;
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.modal {
+  background: #1f1f1f; border: 1px solid var(--linha); border-radius: 16px; width: 100%; max-width: 480px; max-height: 100%; overflow-y: auto;
+  padding: 24px 20px 18px; box-shadow: 0 24px 70px rgba(0,0,0,.65); animation: subir .2s ease-out;
+}
+.modal h2 { font-size: 21px; font-weight: 800; margin-bottom: 10px; }
+.modal-corpo { color: var(--txt2); font-size: 15px; }
+.modal-corpo p { margin: 0 0 10px; }
+.modal-corpo ul { margin: 6px 0 10px; padding-left: 18px; font-size: 13.5px; }
+.modal-corpo li { margin-bottom: 4px; overflow-wrap: anywhere; }
+.modal-corpo details { margin: 8px 0; }
+.modal-corpo summary { cursor: pointer; color: var(--txt); font-weight: 600; padding: 4px 0; }
+.modal-corpo .alerta { background: #3a2a00; color: #ffd98a; border-radius: 10px; padding: 10px 12px; margin: 10px 0; font-size: 14px; }
+.modal-corpo .sucesso { display: flex; align-items: center; gap: 12px; font-size: 16px; color: var(--txt); margin-bottom: 12px; }
+.modal-corpo .sucesso span { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: rgba(70,211,105,.15); color: var(--ok); flex: none; }
+.modal-botoes { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 20px; }
+.modal-botoes .btn { flex: 1 1 auto; }
+@media (min-width: 520px) { .modal-botoes .btn { flex: none; } }
+.campo {
+  width: 100%; min-height: 48px; padding: 0 14px; border-radius: 10px; font: inherit; font-size: 17px; color: #fff;
+  background: #121212; border: 1px solid rgba(255,255,255,.2); outline: none;
+}
+.campo:focus { border-color: #fff; }
+.escolha { display: grid; gap: 10px; margin-top: 4px; }
+.escolha button { display: flex; align-items: center; gap: 14px; text-align: left; padding: 14px; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--linha); }
+.escolha button:hover { background: var(--bg-hover); }
+.escolha button > span { width: 42px; height: 42px; border-radius: 10px; display: grid; place-items: center; background: rgba(229,9,20,.14); color: var(--verm-claro); flex: none; }
+.escolha b { display: block; color: var(--txt); }
+.escolha small { color: var(--txt2); font-size: 13px; }
+.imp-arquivo { color: var(--txt); font-weight: 600; font-size: 14.5px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.imp-curso { font-size: 13px; color: var(--txt2); margin-bottom: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.imp-nums { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--txt2); margin-top: 8px; }
+.imp-pct { font-size: 44px; font-weight: 900; letter-spacing: -.03em; color: #fff; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+.toast {
+  position: fixed; left: 50%; bottom: calc(var(--abas-h) + var(--sab) + 18px); z-index: 80; transform: translateX(-50%);
+  background: #f2f2f2; color: #111; font-weight: 600; font-size: 14.5px; padding: 12px 18px; border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.5); max-width: calc(100vw - 32px); animation: subir .2s ease-out;
+}
+body.com-player .toast { bottom: calc(var(--sab) + 20px); }
+@keyframes surgir { from { opacity: 0; } to { opacity: 1; } }
+@keyframes subir { from { opacity: 0; transform: translate(var(--tx, 0), 10px); } to { opacity: 1; transform: translate(var(--tx, 0), 0); } }
+.toast { --tx: -50%; }
+.soltar {
+  position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; pointer-events: none;
+  background: rgba(229,9,20,.16); border: 3px dashed var(--verm); font-size: 22px; font-weight: 800;
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<noscript><p style="padding:40px">Este app precisa de JavaScript ativado.</p></noscript>
+
+<!-- Cabeçalho -->
+<header class="topo" id="topo">
+  <button class="icone voltar" id="btn-voltar" data-acao="voltar" aria-label="Voltar" data-icone="voltar" hidden></button>
+  <a class="marca" href="#/" aria-label="Cursos — início"><span class="marca-icone" data-icone="playCheio"></span>Cursos</a>
+  <nav class="nav-topo" aria-label="Navegação">
+    <a href="#/" data-aba="">Início</a>
+    <a href="#/biblioteca" data-aba="biblioteca">Biblioteca</a>
+    <a href="#/ajustes" data-aba="ajustes">Ajustes</a>
+  </nav>
+  <div class="topo-dir">
+    <button class="btn btn-verm btn-peq btn-importar-topo" data-acao="importar" data-icone="mais">Importar curso</button>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<!-- Abas inferiores (celular) -->
+<nav class="abas" id="abas" aria-label="Navegação principal">
+  <a class="aba" href="#/" data-aba=""><span data-icone="casa"></span>Início</a>
+  <a class="aba" href="#/biblioteca" data-aba="biblioteca"><span data-icone="grade"></span>Biblioteca</a>
+  <button class="aba aba-importar" data-acao="importar"><span class="circ" data-icone="mais"></span>Importar</button>
+  <a class="aba" href="#/ajustes" data-aba="ajustes"><span data-icone="ajustes"></span>Ajustes</a>
+</nav>
+
+<!-- Player (sobreposto) -->
+<div class="player" id="player" hidden>
+  <div class="player-topo">
+    <button class="icone" data-acao="fechar-player" aria-label="Voltar" data-icone="voltar"></button>
+    <div class="player-titulos">
+      <div class="pl-curso" id="pl-curso"></div>
+      <div class="pl-aula" id="pl-aula"></div>
+    </div>
+  </div>
+  <div class="video-caixa">
+    <video id="video" playsinline webkit-playsinline controls preload="metadata"></video>
+    <div class="contagem" id="contagem" hidden>
+      <div class="contagem-caixa">
+        <div class="contagem-rotulo">Próximo episódio</div>
+        <div class="contagem-anel"><svg viewBox="0 0 64 64"><circle class="fundo-anel" cx="32" cy="32" r="28"/><circle class="frente-anel" id="cont-anel" cx="32" cy="32" r="28"/></svg><span id="cont-num">5</span></div>
+        <div class="contagem-titulo" id="cont-titulo"></div>
+        <div class="contagem-botoes">
+          <button class="btn btn-primario" data-acao="cont-agora" data-icone="play">Assistir agora</button>
+          <button class="btn" data-acao="cont-cancelar">Cancelar</button>
+        </div>
+      </div>
+    </div>
+    <div class="pl-erro" id="pl-erro" hidden></div>
+  </div>
+  <div class="player-corpo">
+    <div class="player-controles">
+      <button class="icone" id="pl-anterior" data-acao="pl-anterior" aria-label="Episódio anterior" title="Episódio anterior" data-icone="anterior"></button>
+      <button class="icone" data-acao="pl-voltar10" aria-label="Voltar 10 segundos" title="Voltar 10s (←)" data-icone="volta10"></button>
+      <button class="btn-vel" id="pl-vel" data-acao="pl-velocidade" aria-label="Velocidade" title="Velocidade">1x</button>
+      <button class="icone" data-acao="pl-avancar10" aria-label="Avançar 10 segundos" title="Avançar 10s (→)" data-icone="avanca10"></button>
+      <button class="icone" id="pl-proxima" data-acao="pl-proxima" aria-label="Próximo episódio" title="Próximo episódio (N)" data-icone="proxima"></button>
+      <button class="icone" id="pl-concluida" data-acao="pl-concluida" aria-label="Marcar como assistida" title="Marcar/desmarcar como assistida" data-icone="checkCirc"></button>
+    </div>
+    <div class="player-extra">
+      <div id="pl-prox"></div>
+      <div id="pl-lista"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Entradas de arquivo -->
+<input type="file" id="inp-zip" class="oculto-visual" accept=".zip,application/zip,application/x-zip-compressed" multiple>
+<input type="file" id="inp-pasta" class="oculto-visual" webkitdirectory multiple>
+<input type="file" id="inp-json" class="oculto-visual" accept=".json,application/json">
+
+<!--
+  Web Worker de importação (carregado via Blob para o app continuar sendo um único index.html).
+  Lê o zip (ou os arquivos da pasta) em fatias e grava no OPFS com createSyncAccessHandle,
+  que funciona no Safari do iOS; createWritable é a alternativa quando o acesso síncrono não existe.
+-->
+<script type="text/plain" id="worker-src">
+'use strict';
+const FATIA = 8 * 1024 * 1024; // 8 MB por vez: memória baixa mesmo com zips de vários GB
+let ultimoEnvio = 0;
+
+self.onmessage = async (ev) => {
+  const msg = ev.data;
+  if (!msg || msg.tipo !== 'extrair') return;
+  let raiz;
+  try { raiz = await navigator.storage.getDirectory(); }
+  catch (err) { self.postMessage({ tipo: 'falha', mensagem: 'Armazenamento indisponível: ' + err.message }); return; }
+  for (let i = 0; i < msg.tarefas.length; i++) {
+    const t = msg.tarefas[i];
+    try {
+      await processar(raiz, t, (feito) => progresso(i, feito));
+      self.postMessage({ tipo: 'itemOk', indice: i });
+    } catch (err) {
+      const nome = (err && err.name) || '';
+      const texto = (err && err.message) || String(err);
+      const semEspaco = nome === 'QuotaExceededError' || /quota|space|espa/i.test(texto);
+      self.postMessage({ tipo: 'itemErro', indice: i, mensagem: semEspaco ? 'Sem espaço de armazenamento' : texto, fatal: semEspaco });
+      if (semEspaco) break;
+    }
+  }
+  self.postMessage({ tipo: 'fim' });
+};
+
+// Progresso no máximo a cada 150 ms
+function progresso(indice, feito) {
+  const agora = Date.now();
+  if (agora - ultimoEnvio > 150) { ultimoEnvio = agora; self.postMessage({ tipo: 'progresso', indice, feito }); }
+}
+
+// Cria as pastas do caminho e devolve o handle do arquivo
+async function abrirDestino(raiz, caminho) {
+  const partes = caminho.split('/');
+  let dir = raiz;
+  for (const p of partes.slice(0, -1)) dir = await dir.getDirectoryHandle(p, { create: true });
+  const nome = partes[partes.length - 1];
+  return { dir, nome, fh: await dir.getFileHandle(nome, { create: true }) };
+}
+
+// Escritor com a mesma interface para os dois métodos de gravação
+async function abrirEscritor(fh) {
+  if (typeof fh.createSyncAccessHandle === 'function') {
+    try {
+      const h = await fh.createSyncAccessHandle();
+      // Safari antigo devolvia Promises nesses métodos: o "await" cobre os dois casos
+      await h.truncate(0);
+      let pos = 0;
+      return {
+        async escrever(u8) {
+          let off = 0;
+          while (off < u8.byteLength) {
+            let n = h.write(off ? u8.subarray(off) : u8, { at: pos });
+            if (n && typeof n.then === 'function') n = await n;
+            if (!n) throw new Error('Falha ao gravar no armazenamento');
+            pos += n; off += n;
+          }
+        },
+        async fechar() { await h.flush(); await h.close(); },
+        async abortar() { try { await h.close(); } catch (e) {} }
+      };
+    } catch (err) {
+      if (typeof fh.createWritable !== 'function') throw err;
+    }
+  }
+  if (typeof fh.createWritable === 'function') {
+    const w = await fh.createWritable();
+    return {
+      escrever: (u8) => w.write(u8),
+      fechar: () => w.close(),
+      abortar: async () => { try { await w.abort(); } catch (e) {} }
+    };
+  }
+  throw new Error('Este navegador não permite gravar arquivos');
+}
+
+// Lê o cabeçalho local da entrada para achar onde começam os dados
+async function inicioDados(file, offLocal) {
+  const dv = new DataView(await file.slice(offLocal, offLocal + 30).arrayBuffer());
+  if (dv.byteLength < 30 || dv.getUint32(0, true) !== 0x04034b50) throw new Error('Cabeçalho local do zip inválido');
+  return offLocal + 30 + dv.getUint16(26, true) + dv.getUint16(28, true);
+}
+
+// Copia um intervalo do arquivo em fatias
+async function copiar(file, de, ate, escrever) {
+  for (let p = de; p < ate; p += FATIA) {
+    const buf = await file.slice(p, Math.min(ate, p + FATIA)).arrayBuffer();
+    await escrever(new Uint8Array(buf));
+  }
+}
+
+async function processar(raiz, t, aoProgredir) {
+  const destino = await abrirDestino(raiz, t.destino);
+  const esc = await abrirEscritor(destino.fh);
+  let feito = 0;
+  const escrever = async (u8) => { await esc.escrever(u8); feito += u8.byteLength; aoProgredir(feito); };
+  try {
+    const f = t.fonte;
+    if (f.tipo === 'arquivo') {
+      await copiar(f.file, 0, f.file.size, escrever);
+    } else {
+      const inicio = await inicioDados(f.file, f.offLocal);
+      if (f.metodo === 0) {
+        // "stored": bytes prontos, só copiar
+        await copiar(f.file, inicio, inicio + f.comp, escrever);
+      } else if (f.metodo === 8) {
+        // "deflate": descompacta em streaming
+        const leitor = f.file.slice(inicio, inicio + f.comp).stream()
+          .pipeThrough(new DecompressionStream('deflate-raw')).getReader();
+        for (;;) {
+          const { done, value } = await leitor.read();
+          if (done) break;
+          if (value && value.byteLength) await escrever(value);
+        }
+      } else {
+        throw new Error('Método de compressão não suportado');
+      }
+    }
+    if (feito !== t.tamanho) throw new Error('Tamanho diferente do esperado (zip corrompido ou incompleto?)');
+    await esc.fechar();
+  } catch (err) {
+    await esc.abortar();
+    try { await destino.dir.removeEntry(destino.nome); } catch (e) {}
+    throw err;
+  }
+}
+</script>
+
+<script>
+'use strict';
+
+/* =========================================================
+   Utilidades
+   ========================================================= */
+const $ = (sel, el = document) => el.querySelector(sel);
+const $$ = (sel, el = document) => Array.from(el.querySelectorAll(sel));
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const colator = new Intl.Collator('pt-BR', { numeric: true, sensitivity: 'base' }); // ordem natural: 1, 2, 10
+const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const EXT_VIDEO = { mp4: 'video/mp4', m4v: 'video/mp4', mov: 'video/quicktime', webm: 'video/webm' };
+const EXT_IMG = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
+const EXT_NAO_TOCA = ['mkv', 'avi', 'wmv', 'flv', 'mpg', 'mpeg', 'ts', '3gp', 'vob'];
+const VELOCIDADES = [1, 1.25, 1.5, 1.75, 2];
+const APP = 'Cursos';
+
+const SUPORTE = {
+  opfs: !!(navigator.storage && navigator.storage.getDirectory) && window.isSecureContext,
+  deflate: (() => { try { new DecompressionStream('deflate-raw'); return true; } catch (e) { return false; } })(),
+  pasta: 'webkitdirectory' in document.createElement('input') && !/iPhone|iPad|iPod/.test(navigator.userAgent) &&
+         !(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1),
+  instalado: matchMedia('(display-mode: standalone)').matches || navigator.standalone === true,
+  ios: /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+};
+
+function novoId() {
+  if (crypto.randomUUID) return crypto.randomUUID().replace(/-/g, '').slice(0, 16);
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+}
+
+function fmtBytes(b) {
+  if (!isFinite(b) || b < 0) return '—';
+  const u = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let i = 0;
+  while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; }
+  return b.toLocaleString('pt-BR', { maximumFractionDigits: b < 10 && i > 0 ? 1 : 0 }) + ' ' + u[i];
+}
+function fmtTempo(s) {
+  if (!isFinite(s) || s <= 0) return '';
+  s = Math.round(s);
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
+  return h ? `${h}:${String(m).padStart(2, '0')}:${String(ss).padStart(2, '0')}` : `${m}:${String(ss).padStart(2, '0')}`;
+}
+function fmtDuracao(s) {
+  if (!s) return '';
+  const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
+  return h ? `${h}h ${m}min` : m ? `${m} min` : '<1 min';
+}
+const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
+
+function extensao(nome) { const m = /\.([^./]+)$/.exec(nome); return m ? m[1].toLowerCase() : ''; }
+// Título: tira extensão e números de ordem do início ("20_9_Content" → "Content", "03 - Intro" → "Intro")
+function limparTitulo(nome) {
+  const base = nome.replace(/\.[^./]+$/, '');
+  const semNumero = base.replace(/^\s*(\d{1,4}\s*[._\-–—)]\s*)+/, '');
+  return (semNumero || base).replace(/_+/g, ' ').replace(/\s+/g, ' ').trim() || nome;
+}
+const comecaComNumero = (caminho) => /^\s*\d/.test(caminho.split('/').pop());
+function dosParaMs(hora, data) {
+  if (!data) return 0;
+  return new Date(1980 + (data >> 9), ((data >> 5) & 15) - 1, data & 31, hora >> 11, (hora >> 5) & 63, (hora & 31) * 2).getTime();
+}
+function nomeModulo(m) { return m || 'Episódios'; }
+
+// Cor estável a partir de um texto (capas geradas)
+function matiz(txt) { let h = 2166136261; for (const c of String(txt)) h = Math.imul(h ^ c.codePointAt(0), 16777619); return ((h >>> 0) % 36) * 10; }
+function iniciais(nome) {
+  const pal = nome.replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter((p) => p.length > 2 || /\d/.test(p));
+  const base = pal.length ? pal : nome.split(/\s+/);
+  return base.slice(0, 2).map((p) => p[0]).join('').toUpperCase() || 'C';
+}
+
+function lerPref(chave, padrao) { try { const v = localStorage.getItem('meuflix.' + chave); return v === null ? padrao : JSON.parse(v); } catch (e) { return padrao; } }
+function salvarPref(chave, valor) { try { localStorage.setItem('meuflix.' + chave, JSON.stringify(valor)); } catch (e) {} }
+
+// Espera um evento de mídia (true) ou desiste no tempo limite/erro (false)
+function aguardar(el, evento, ms) {
+  return new Promise((ok) => {
+    const fim = (v) => { clearTimeout(t); el.removeEventListener(evento, sim); el.removeEventListener('error', nao); ok(v); };
+    const sim = () => fim(true), nao = () => fim(false);
+    const t = setTimeout(() => fim(false), ms);
+    el.addEventListener(evento, sim, { once: true });
+    el.addEventListener('error', nao, { once: true });
+  });
+}
+
+const ICONE = {
+  voltar: '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
+  mais: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-width="2.4"/></svg>',
+  casa: '<svg viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg>',
+  grade: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>',
+  ajustes: '<svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>',
+  play: '<svg viewBox="0 0 24 24"><path d="M7 4.6v14.8a1 1 0 0 0 1.5.86l12.3-7.4a1 1 0 0 0 0-1.72L8.5 3.74A1 1 0 0 0 7 4.6z" fill="currentColor" stroke="none"/></svg>',
+  playCheio: '<svg viewBox="0 0 24 24"><path d="M6 3.8v16.4a1.2 1.2 0 0 0 1.8 1l13.4-8.2a1.2 1.2 0 0 0 0-2L7.8 2.8A1.2 1.2 0 0 0 6 3.8z"/></svg>',
+  info: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+  check: '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  checkCirc: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>',
+  lixo: '<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>',
+  chevron: '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>',
+  volta10: '<svg viewBox="0 0 24 24"><path d="M4.2 13A8 8 0 1 0 6.8 6"/><path d="M6.5 2.5v3.8h3.8"/><text x="12.6" y="16.2" font-size="7.5" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none" font-family="Arial, sans-serif">10</text></svg>',
+  avanca10: '<svg viewBox="0 0 24 24"><path d="M19.8 13A8 8 0 1 1 17.2 6"/><path d="M17.5 2.5v3.8h-3.8"/><text x="11.4" y="16.2" font-size="7.5" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none" font-family="Arial, sans-serif">10</text></svg>',
+  proxima: '<svg viewBox="0 0 24 24"><path d="M5 5.5v13l10-6.5z" fill="currentColor"/><path d="M19 5v14"/></svg>',
+  anterior: '<svg viewBox="0 0 24 24"><path d="M19 5.5v13L9 12z" fill="currentColor"/><path d="M5 5v14"/></svg>',
+  zip: '<svg viewBox="0 0 24 24"><path d="M6 3h8l5 5v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5M10 7h1M10 10h1M10 13h1M9.5 16h2v2.5h-2z"/></svg>',
+  pasta: '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+  disco: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15h.01M11 15h6"/></svg>',
+  seta: '<svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
+  editar: '<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>',
+  celular: '<svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>'
+};
+
+/* =========================================================
+   IndexedDB: cursos, aulas, progresso e miniaturas
+   (o nome interno "meuflix" é mantido para não perder dados já importados)
+   ========================================================= */
+const DB = {
+  _db: null,
+  abrir() {
+    if (this._db) return Promise.resolve(this._db);
+    return new Promise((ok, erro) => {
+      const req = indexedDB.open('meuflix', 2);
+      req.onupgradeneeded = (ev) => {
+        const db = req.result;
+        if (ev.oldVersion < 1) {
+          db.createObjectStore('cursos', { keyPath: 'id' });
+          db.createObjectStore('aulas', { keyPath: 'id' }).createIndex('cursoId', 'cursoId');
+          db.createObjectStore('progresso', { keyPath: 'aulaId' });
+        }
+        if (ev.oldVersion < 2) db.createObjectStore('miniaturas', { keyPath: 'aulaId' });
+      };
+      req.onsuccess = () => { this._db = req.result; ok(this._db); };
+      req.onerror = () => erro(req.error);
+    });
+  },
+  async tx(lojas, modo, fn) {
+    const db = await this.abrir();
+    return new Promise((ok, erro) => {
+      const t = db.transaction(lojas, modo);
+      let r;
+      try { r = fn(t); } catch (e) { try { t.abort(); } catch (x) {} erro(e); return; }
+      t.oncomplete = () => ok(r instanceof IDBRequest ? r.result : Array.isArray(r) ? r.map((q) => q.result) : r);
+      t.onerror = () => erro(t.error);
+      t.onabort = () => erro(t.error || new Error('Transação abortada'));
+    });
+  },
+  get(loja, chave) { return this.tx(loja, 'readonly', (t) => t.objectStore(loja).get(chave)); },
+  getVarios(loja, chaves) { return this.tx(loja, 'readonly', (t) => chaves.map((k) => t.objectStore(loja).get(k))); },
+  todos(loja) { return this.tx(loja, 'readonly', (t) => t.objectStore(loja).getAll()); },
+  aulasDoCurso(cursoId) { return this.tx('aulas', 'readonly', (t) => t.objectStore('aulas').index('cursoId').getAll(cursoId)); },
+  put(loja, valor) { return this.tx(loja, 'readwrite', (t) => t.objectStore(loja).put(valor)); },
+  putVarios(loja, lista) { return this.tx(loja, 'readwrite', (t) => { const s = t.objectStore(loja); lista.forEach((v) => s.put(v)); }); },
+  apagar(aulaIds, cursoId) {
+    return this.tx(['aulas', 'progresso', 'cursos', 'miniaturas'], 'readwrite', (t) => {
+      for (const id of aulaIds) { t.objectStore('aulas').delete(id); t.objectStore('progresso').delete(id); t.objectStore('miniaturas').delete(id); }
+      if (cursoId) t.objectStore('cursos').delete(cursoId);
+    });
+  },
+  limparTudo() {
+    const lojas = ['aulas', 'progresso', 'cursos', 'miniaturas'];
+    return this.tx(lojas, 'readwrite', (t) => { lojas.forEach((s) => t.objectStore(s).clear()); });
+  }
+};
+
+/* =========================================================
+   OPFS: onde ficam os vídeos
+   ========================================================= */
+const OPFS = {
+  raiz() { return navigator.storage.getDirectory(); },
+  async _pai(caminho) {
+    const partes = caminho.split('/');
+    let dir = await this.raiz();
+    for (const p of partes.slice(0, -1)) dir = await dir.getDirectoryHandle(p);
+    return { dir, nome: partes[partes.length - 1] };
+  },
+  async arquivo(caminho) {
+    const { dir, nome } = await this._pai(caminho);
+    return (await dir.getFileHandle(nome)).getFile();
+  },
+  // Remove arquivo/pasta; tenta de novo se estiver travado (ex.: logo após cancelar)
+  async remover(caminho) {
+    for (let tentativa = 0; tentativa < 5; tentativa++) {
+      try {
+        const { dir, nome } = await this._pai(caminho);
+        await dir.removeEntry(nome, { recursive: true });
+        return;
+      } catch (err) {
+        if (err.name === 'NotFoundError' || err.name === 'TypeMismatchError') return;
+        await espera(300);
+      }
+    }
+  },
+  async apagarTudo() {
+    const raiz = await this.raiz();
+    const nomes = [];
+    try { for await (const nome of raiz.keys()) nomes.push(nome); } catch (e) { nomes.push('cursos'); }
+    for (const n of nomes) { try { await raiz.removeEntry(n, { recursive: true }); } catch (e) {} }
+  }
+};
+
+/* =========================================================
+   Leitor de ZIP pelo fim do arquivo (com ZIP64)
+   ========================================================= */
+const u64 = (dv, o) => dv.getUint32(o, true) + dv.getUint32(o + 4, true) * 4294967296;
+// CP850: página de código do Windows em português, para nomes sem a flag UTF-8
+const CP850 = 'ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐└┴┬├─┼ãÃ╚╔╩╦╠═╬¤ðÐÊËÈıÍÎÏ┘┌█▄¦Ì▀ÓßÔÒõÕµþÞÚÛÙýÝ¯´­±‗¾¶§÷¸°¨·¹³²■ ';
+const utf8Estrito = new TextDecoder('utf-8', { fatal: true });
+const utf8 = new TextDecoder('utf-8');
+
+function decodificarNome(bytes, flags) {
+  if (flags & 0x800) return utf8.decode(bytes);
+  try { return utf8Estrito.decode(bytes); } catch (e) {
+    let s = '';
+    for (const b of bytes) s += b < 128 ? String.fromCharCode(b) : CP850[b - 128];
+    return s;
+  }
+}
+
+const ZIP = {
+  async ler(file) {
+    const tam = file.size;
+    if (tam < 22) throw new Error('Arquivo pequeno demais para ser um zip');
+    // O fim do índice fica nos últimos 22 bytes + comentário (até 64 KB)
+    const tamFim = Math.min(tam, 22 + 65535 + 20);
+    const fim = await file.slice(tam - tamFim).arrayBuffer();
+    const dv = new DataView(fim);
+    let p = -1;
+    for (let i = fim.byteLength - 22; i >= 0; i--) {
+      if (dv.getUint32(i, true) === 0x06054b50) { p = i; break; }
+    }
+    if (p < 0) throw new Error('Não é um .zip válido (índice não encontrado)');
+    let total = dv.getUint16(p + 10, true);
+    let cdTam = dv.getUint32(p + 12, true);
+    let cdOff = dv.getUint32(p + 16, true);
+    // ZIP64: o localizador fica 20 bytes antes
+    if (p >= 20 && dv.getUint32(p - 20, true) === 0x07064b50) {
+      const off64 = u64(dv, p - 20 + 8);
+      const z = new DataView(await file.slice(off64, off64 + 56).arrayBuffer());
+      if (z.byteLength < 56 || z.getUint32(0, true) !== 0x06064b50) throw new Error('Registro ZIP64 inválido');
+      total = u64(z, 32); cdTam = u64(z, 40); cdOff = u64(z, 48);
+    } else if (total === 0xffff || cdTam === 0xffffffff || cdOff === 0xffffffff) {
+      throw new Error('Zip64 sem localizador — arquivo corrompido');
+    }
+    if (cdOff + cdTam > tam) throw new Error('Zip incompleto ou dividido em partes (não suportado)');
+
+    const cd = await file.slice(cdOff, cdOff + cdTam).arrayBuffer();
+    const c = new DataView(cd), bytes = new Uint8Array(cd);
+    const entradas = [];
+    let o = 0;
+    while (o + 46 <= cd.byteLength && c.getUint32(o, true) === 0x02014b50) {
+      const flags = c.getUint16(o + 8, true);
+      const metodo = c.getUint16(o + 10, true);
+      let comp = c.getUint32(o + 20, true);
+      let tamanho = c.getUint32(o + 24, true);
+      const nl = c.getUint16(o + 28, true), el = c.getUint16(o + 30, true), cl = c.getUint16(o + 32, true);
+      let offLocal = c.getUint32(o + 42, true);
+      let data = dosParaMs(c.getUint16(o + 12, true), c.getUint16(o + 14, true));
+      let nome = null;
+      // Extras: 0x0001 = ZIP64, 0x5455 = data Unix, 0x7075 = nome Unicode
+      let e = o + 46 + nl;
+      const eFim = Math.min(e + el, cd.byteLength);
+      while (e + 4 <= eFim) {
+        const id = c.getUint16(e, true), sz = c.getUint16(e + 2, true);
+        let q = e + 4;
+        if (id === 0x0001) {
+          if (tamanho === 0xffffffff && q + 8 <= e + 4 + sz) { tamanho = u64(c, q); q += 8; }
+          if (comp === 0xffffffff && q + 8 <= e + 4 + sz) { comp = u64(c, q); q += 8; }
+          if (offLocal === 0xffffffff && q + 8 <= e + 4 + sz) { offLocal = u64(c, q); q += 8; }
+        } else if (id === 0x5455 && sz >= 5 && (c.getUint8(e + 4) & 1)) {
+          data = c.getUint32(e + 5, true) * 1000;
+        } else if (id === 0x7075 && !(flags & 0x800) && sz > 5) {
+          try { nome = utf8Estrito.decode(bytes.subarray(e + 9, e + 4 + sz)); } catch (x) {}
+        }
+        e += 4 + sz;
+      }
+      if (nome === null) nome = decodificarNome(bytes.subarray(o + 46, o + 46 + nl), flags);
+      nome = nome.replace(/\\/g, '/');
+      entradas.push({ nome, flags, metodo, comp, tamanho, offLocal, data, pasta: nome.endsWith('/') });
+      o += 46 + nl + el + cl;
+    }
+    if (!entradas.length && total > 0) throw new Error('Índice do zip ilegível');
+    return entradas;
+  }
+};
+
+/* =========================================================
+   Planejamento: arquivos → curso / módulos / episódios
+   ========================================================= */
+function planejar(nomeCurso, itens) {
+  const ignorados = [];
+  let ocultos = 0;
+  const midias = [];
+  for (const it of itens) {
+    const partes = it.caminho.replace(/\\/g, '/').split('/').filter((p) => p && p !== '.');
+    if (!partes.length) continue;
+    const nome = partes[partes.length - 1];
+    // __MACOSX, ocultos e lixo de sistema: ignorados em silêncio
+    if (partes.some((p) => p === '__MACOSX' || p.startsWith('.')) || /^(thumbs\.db|desktop\.ini)$/i.test(nome)) { ocultos++; continue; }
+    const ext = extensao(nome);
+    const caminho = partes.join('/');
+    const tipo = EXT_VIDEO[ext] ? 'video' : EXT_IMG[ext] ? 'imagem' : null;
+    if (!tipo) {
+      ignorados.push({ caminho, ext, motivo: EXT_NAO_TOCA.includes(ext) ? `.${ext} não toca no iPhone — converta para MP4` : 'tipo não suportado' });
+      continue;
+    }
+    if (it.obs) { ignorados.push({ caminho, ext, motivo: it.obs }); continue; }
+    if (!it.tamanho) { ignorados.push({ caminho, ext, motivo: 'arquivo vazio (0 KB) — download incompleto?' }); continue; }
+    midias.push({ ...it, partes, nome, ext, tipo });
+  }
+
+  // Uma única pasta raiz em volta de tudo é descartada
+  if (midias.length && midias.every((m) => m.partes.length >= 2 && m.partes[0] === midias[0].partes[0])) {
+    midias.forEach((m) => { m.partes = m.partes.slice(1); });
+  }
+
+  const videos = [], imagens = [];
+  for (const m of midias) {
+    const rel = m.partes.join('/');
+    if (m.tipo === 'video') {
+      // Primeira subpasta = módulo; sem subpasta = módulo único
+      const modulo = m.partes.length > 1 ? m.partes[0] : '';
+      const meio = m.partes.slice(1, -1);
+      videos.push({ rel, modulo, titulo: [...meio, limparTitulo(m.nome)].join(' › '), ext: m.ext, tamanho: m.tamanho, fonte: m.fonte, data: m.data || 0 });
+    } else {
+      imagens.push({ rel, partes: m.partes, ext: m.ext, tamanho: m.tamanho, fonte: m.fonte });
+    }
+  }
+
+  // Capa: prefere "capa"/"cover"; depois a imagem mais rasa
+  const preferida = (i) => /^(capa|cover|poster|folder|thumb|thumbnail|banner)\./i.test(i.partes[i.partes.length - 1]) ? 1 : 0;
+  imagens.sort((a, b) => (preferida(b) - preferida(a)) || (a.partes.length - b.partes.length) || colator.compare(a.rel, b.rel));
+  const capa = imagens[0] || null;
+  imagens.slice(1).forEach((i) => ignorados.push({ caminho: i.rel, ext: i.ext, motivo: 'imagem extra (só uma capa por curso)' }));
+
+  // Ordem dos episódios em cada módulo:
+  // nomes numerados ("2_...", "13_1_...") → ordem natural; sem número → data do arquivo (ordem do download)
+  const porModulo = new Map();
+  for (const v of videos) { if (!porModulo.has(v.modulo)) porModulo.set(v.modulo, []); porModulo.get(v.modulo).push(v); }
+  const ordenados = [...porModulo.keys()].sort(cmpModulo).flatMap((mod) => {
+    const lista = porModulo.get(mod);
+    const numerados = lista.every((v) => comecaComNumero(v.rel));
+    const porData = !numerados && lista.every((v) => v.data) && new Set(lista.map((v) => v.data)).size > 1;
+    return lista.sort((a, b) => (porData ? a.data - b.data : 0) || colator.compare(a.rel, b.rel));
+  });
+  ordenados.forEach((v, i) => { v.ordem = i; });
+  return { nomeCurso, videos: ordenados, capa, ignorados, ocultos };
+}
+
+function cmpModulo(a, b) { if (a === b) return 0; if (!a) return -1; if (!b) return 1; return colator.compare(a, b); }
+// Mesma regra: numerados pelo nome; sem número, pela ordem gravada na importação
+function ordenarAulas(aulas) {
+  const porModulo = new Map();
+  for (const a of aulas) { if (!porModulo.has(a.modulo)) porModulo.set(a.modulo, []); porModulo.get(a.modulo).push(a); }
+  return [...porModulo.keys()].sort(cmpModulo).flatMap((mod) => {
+    const lista = porModulo.get(mod).slice();
+    const numerados = lista.every((a) => comecaComNumero(a.origem));
+    return lista.sort((a, b) => (numerados ? 0 : (a.ordem ?? 1e9) - (b.ordem ?? 1e9)) || colator.compare(a.origem, b.origem));
+  });
+}
+function nomeDoZip(n) { return n.replace(/\.zip$/i, '').replace(/_+/g, ' ').replace(/\s+/g, ' ').trim() || 'Curso'; }
+
+/* =========================================================
+   Modais, confirmações e toast
+   ========================================================= */
+function abrirModal(html, { fechavel = true } = {}) {
+  const fundo = document.createElement('div');
+  fundo.className = 'modal-fundo';
+  fundo.innerHTML = `<div class="modal" role="dialog" aria-modal="true">${html}</div>`;
+  document.body.appendChild(fundo);
+  document.body.classList.add('com-modal');
+  const m = {
+    el: fundo.firstElementChild, fundo, fechavel,
+    fechar() { fundo.remove(); if (!$('.modal-fundo')) document.body.classList.remove('com-modal'); }
+  };
+  fundo._modal = m;
+  if (fechavel) fundo.addEventListener('click', (e) => { if (e.target === fundo) fundo.dispatchEvent(new Event('fechar')); });
+  return m;
+}
+
+function dialogo({ titulo, html = '', botoes = [{ rotulo: 'OK', valor: true, classe: 'btn-primario' }], fechavel = true }) {
+  return new Promise((resolve) => {
+    const m = abrirModal(
+      `${titulo ? `<h2>${esc(titulo)}</h2>` : ''}<div class="modal-corpo">${html}</div>
+       ${botoes.length ? `<div class="modal-botoes">${botoes.map((b, i) => `<button class="btn ${b.classe || 'btn-sec'}" data-i="${i}">${b.icone ? ICONE[b.icone] : ''}${esc(b.rotulo)}</button>`).join('')}</div>` : ''}`,
+      { fechavel });
+    m.el.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-i], [data-valor]');
+      if (!b) return;
+      m.fechar(); resolve(b.dataset.valor !== undefined ? b.dataset.valor : botoes[+b.dataset.i].valor);
+    });
+    m.fundo.addEventListener('fechar', () => { m.fechar(); resolve(null); });
+  });
+}
+
+function confirmar(titulo, html, rotuloOk = 'Confirmar', perigo = false) {
+  return dialogo({ titulo, html, botoes: [{ rotulo: 'Cancelar', valor: false }, { rotulo: rotuloOk, valor: true, classe: perigo ? 'btn-verm' : 'btn-primario' }] });
+}
+
+let toastTimer = null;
+function toast(msg, ms = 2800) {
+  let t = $('.toast');
+  if (!t) { t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+  t.textContent = msg;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.remove(), ms);
+}
+
+/* =========================================================
+   Capas e miniaturas dos episódios
+   ========================================================= */
+const urlsCapa = new Map(); // cursoId -> object URL
+const urlsMini = new Map(); // aulaId -> object URL
+
+async function capaUrl(curso) {
+  if (!curso || !curso.capa) return null;
+  if (urlsCapa.has(curso.id)) return urlsCapa.get(curso.id);
+  try {
+    const f = await OPFS.arquivo(curso.capa);
+    const blob = f.slice(0, f.size, EXT_IMG[extensao(curso.capa)] || 'image/jpeg');
+    if (window.createImageBitmap) { const bmp = await createImageBitmap(blob); bmp.close?.(); } // imagem ilegível → capa gerada
+    const url = URL.createObjectURL(blob);
+    urlsCapa.set(curso.id, url);
+    return url;
+  } catch (e) { return null; }
+}
+function esquecerCapa(cursoId) { const u = urlsCapa.get(cursoId); if (u) { URL.revokeObjectURL(u); urlsCapa.delete(cursoId); } }
+
+// Carrega as miniaturas pedidas (uma transação só) e devolve Map aulaId -> URL
+async function miniaturas(aulas) {
+  const faltam = aulas.filter((a) => a && a.temMiniatura && !urlsMini.has(a.id)).map((a) => a.id);
+  if (faltam.length) {
+    try {
+      const regs = await DB.getVarios('miniaturas', faltam);
+      regs.forEach((r) => { if (r && r.dados && !urlsMini.has(r.aulaId)) urlsMini.set(r.aulaId, URL.createObjectURL(new Blob([r.dados], { type: r.tipo || 'image/jpeg' }))); });
+    } catch (e) {}
+  }
+  return urlsMini;
+}
+function esquecerMinis(ids) { for (const id of ids) { const u = urlsMini.get(id); if (u) { URL.revokeObjectURL(u); urlsMini.delete(id); } } }
+
+// Capa do curso: imagem do zip → quadro do 1º episódio → cor + iniciais
+function capaHtml(curso, url, primeira) {
+  if (url) return `<div class="capa" style="background-image:url('${url}')"></div>`;
+  const mini = primeira && urlsMini.get(primeira.id);
+  return `<div class="capa gerada ${mini ? 'com-mini' : ''}" style="--h:${matiz(curso.nome)};${mini ? `background-image:url('${mini}')` : ''}" ${primeira ? `data-mini="${primeira.id}"` : ''}><span class="iniciais">${esc(iniciais(curso.nome))}</span></div>`;
+}
+
+function thumbEp(a, num, p, extra = '') {
+  const mini = urlsMini.get(a.id);
+  const pct = pctAula(p, a);
+  return `<div class="ep-thumb ${mini ? 'com-mini' : ''}" data-mini="${a.id}" style="--h:${matiz(a.cursoId)};${mini ? `background-image:url('${mini}')` : ''}">
+    <span class="ep-thumb-num">${num}</span>
+    <span class="ep-ico">${ICONE.play}</span>
+    ${a.duracao ? `<span class="ep-dur">${fmtTempo(a.duracao)}</span>` : ''}
+    ${pct > 0 && pct < 100 ? `<div class="barra"><i style="width:${pct}%"></i></div>` : ''}${extra}
+  </div>`;
+}
+
+// Aplica uma miniatura recém-gerada em todos os lugares da tela que a esperam
+function aplicarMini(aulaId, url) {
+  $$(`[data-mini="${aulaId}"]`).forEach((el) => { el.style.backgroundImage = `url('${url}')`; el.classList.add('com-mini'); });
+}
+
+// Arte para a tela de bloqueio quando não há capa nem miniatura
+function arteGerada(curso) {
+  try {
+    const cv = document.createElement('canvas');
+    cv.width = cv.height = 512;
+    const g = cv.getContext('2d'), h = matiz(curso.nome);
+    const grad = g.createLinearGradient(0, 0, 512, 512);
+    grad.addColorStop(0, `hsl(${h} 75% 45%)`);
+    grad.addColorStop(1, `hsl(${h + 50} 55% 10%)`);
+    g.fillStyle = grad; g.fillRect(0, 0, 512, 512);
+    g.fillStyle = 'rgba(255,255,255,.93)';
+    g.font = '900 200px -apple-system, "Segoe UI", Arial, sans-serif';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(iniciais(curso.nome), 256, 270);
+    return cv.toDataURL('image/png');
+  } catch (e) { return 'icon-512.png'; }
+}
+
+/* =========================================================
+   Processamento em segundo plano: duração + miniatura de cada episódio
+   ========================================================= */
+const precisaProcessar = (a) => (!a.duracao && !a.semDuracao) || (!a.temMiniatura && !a.semMiniatura);
+
+function quadroVazio(g) {
+  const d = g.getImageData(0, 0, 320, 180).data;
+  let soma = 0;
+  for (let i = 0; i < d.length; i += 4 * 97) soma += d[i] + d[i + 1] + d[i + 2];
+  return soma < 60;
+}
+
+async function capturarQuadro(v, tempos) {
+  const cv = document.createElement('canvas');
+  cv.width = 320; cv.height = 180;
+  const g = cv.getContext('2d', { willReadFrequently: true });
+  const desenhar = () => {
+    const vw = v.videoWidth, vh = v.videoHeight;
+    if (!vw || !vh) return false;
+    g.fillStyle = '#000'; g.fillRect(0, 0, 320, 180);
+    const k = Math.max(320 / vw, 180 / vh), w = vw * k, h = vh * k;
+    g.drawImage(v, (320 - w) / 2, (180 - h) / 2, w, h);
+    return !quadroVazio(g);
+  };
+  for (const t of tempos) {
+    const buscou = aguardar(v, 'seeked', 8000);
+    try { v.currentTime = t; } catch (e) { continue; }
+    if (!await buscou) continue;
+    if (v.readyState < 2) await aguardar(v, 'loadeddata', 4000);
+    let ok = false;
+    try { ok = desenhar(); } catch (e) {}
+    if (!ok) {
+      // iOS às vezes só decodifica o quadro depois de tocar (mudo) um instante
+      try { await v.play(); await aguardar(v, 'timeupdate', 3000); v.pause(); ok = desenhar(); } catch (e) {}
+    }
+    if (ok) return new Promise((r) => cv.toBlob((b) => r(b), 'image/jpeg', 0.74));
+  }
+  return null;
+}
+
+async function processarAula(a) {
+  let url = null;
+  const v = document.createElement('video');
+  v.muted = true; v.defaultMuted = true; v.playsInline = true; v.preload = 'auto';
+  v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+  v.className = 'video-oculto';
+  document.body.appendChild(v);
+  try {
+    const f = await OPFS.arquivo(a.caminho);
+    url = URL.createObjectURL(f.slice(0, f.size, EXT_VIDEO[a.ext] || 'video/mp4'));
+    const meta = aguardar(v, 'loadedmetadata', 12000);
+    v.src = url;
+    const mudou = {};
+    if (!await meta) { mudou.semDuracao = !a.duracao; mudou.semMiniatura = true; }
+    else {
+      const d = v.duration;
+      if (!a.duracao) { if (isFinite(d) && d > 0) mudou.duracao = d; else mudou.semDuracao = true; }
+      if (!a.temMiniatura) {
+        const base = isFinite(d) && d > 0 ? d : 30;
+        const blob = await capturarQuadro(v, [Math.min(Math.max(base * 0.12, 1), 90), Math.min(base * 0.4, 240)]);
+        if (blob) {
+          await DB.put('miniaturas', { aulaId: a.id, dados: await blob.arrayBuffer(), tipo: 'image/jpeg' });
+          mudou.temMiniatura = true;
+          const u = URL.createObjectURL(blob);
+          urlsMini.set(a.id, u);
+          aplicarMini(a.id, u);
+        } else mudou.semMiniatura = true;
+      }
+    }
+    // Relê antes de gravar para não sobrescrever mudanças feitas enquanto processava
+    const atual = await DB.get('aulas', a.id);
+    if (atual) { Object.assign(atual, mudou); await DB.put('aulas', atual); }
+    if (mudou.duracao) $$(`[data-mini="${a.id}"]`).forEach((el) => { if (!el.querySelector('.ep-dur') && el.classList.contains('ep-thumb')) el.insertAdjacentHTML('beforeend', `<span class="ep-dur">${fmtTempo(mudou.duracao)}</span>`); });
+  } catch (e) { /* segue para a próxima */ }
+  finally {
+    v.removeAttribute('src'); v.load(); v.remove();
+    if (url) URL.revokeObjectURL(url);
+  }
+}
+
+const Processador = {
+  fila: [], ids: new Set(), rodando: false,
+  adicionar(aulas) {
+    for (const a of aulas) if (a && precisaProcessar(a) && !this.ids.has(a.id)) { this.ids.add(a.id); this.fila.push(a.id); }
+    this.rodar();
+  },
+  async rodar() {
+    if (this.rodando || !this.fila.length) return;
+    this.rodando = true;
+    try {
+      while (this.fila.length) {
+        // Não compete com o player nem com a importação
+        if (Player.ativo || importando || document.hidden) { await espera(2500); continue; }
+        const id = this.fila.shift();
+        this.ids.delete(id);
+        const a = await DB.get('aulas', id);
+        if (a && precisaProcessar(a)) await processarAula(a);
+      }
+    } finally { this.rodando = false; }
+  }
+};
+
+/* =========================================================
+   Dados agregados
+   ========================================================= */
+async function carregarTudo() {
+  const [cursos, aulas, progs] = await Promise.all([DB.todos('cursos'), DB.todos('aulas'), DB.todos('progresso')]);
+  const prog = new Map(progs.map((p) => [p.aulaId, p]));
+  const aulaMap = new Map(aulas.map((a) => [a.id, a]));
+  const porCurso = new Map(cursos.map((c) => [c.id, { aulas: [], ord: [], concluidas: 0, ultima: 0, tamanho: 0, duracao: 0, assistido: 0 }]));
+  for (const a of aulas) {
+    const s = porCurso.get(a.cursoId);
+    if (!s) continue;
+    s.aulas.push(a);
+    s.tamanho += a.tamanho || 0;
+    s.duracao += a.duracao || 0;
+    const p = prog.get(a.id);
+    if (p) {
+      if (p.concluida) { s.concluidas++; s.assistido += a.duracao || p.duracao || 0; }
+      else s.assistido += p.posicao || 0;
+      s.ultima = Math.max(s.ultima, p.atualizadoEm || 0);
+    }
+  }
+  const num = new Map();
+  for (const s of porCurso.values()) { s.ord = ordenarAulas(s.aulas); s.ord.forEach((a, i) => num.set(a.id, i + 1)); }
+  return { cursos, aulas, prog, aulaMap, porCurso, num };
+}
+
+function pctCurso(s) { return s.aulas.length ? Math.round((s.concluidas / s.aulas.length) * 100) : 0; }
+function pctAula(p, a) {
+  if (!p) return 0;
+  if (p.concluida) return 100;
+  const d = p.duracao || a?.duracao;
+  return d ? Math.min(100, Math.round((p.posicao / d) * 100)) : 0;
+}
+function statusCurso(s) {
+  if (!s.aulas.length) return 'vazio';
+  if (s.concluidas === s.aulas.length) return 'concluido';
+  return s.ultima ? 'andamento' : 'novo';
+}
+
+// Qual episódio o "Continuar" deve abrir
+function aulaParaContinuar(ordenadas, prog) {
+  let melhor = null;
+  for (const a of ordenadas) {
+    const p = prog.get(a.id);
+    if (p && !p.concluida && p.posicao > 5 && (!melhor || p.atualizadoEm > melhor.p.atualizadoEm)) melhor = { a, p };
+  }
+  if (melhor) return { aula: melhor.a, rotulo: 'Continuar', tipo: 'parou' };
+  let ultIdx = -1, ultT = 0;
+  ordenadas.forEach((a, i) => { const p = prog.get(a.id); if (p?.concluida && (p.atualizadoEm || 0) >= ultT) { ultT = p.atualizadoEm || 0; ultIdx = i; } });
+  for (let i = ultIdx + 1; i < ordenadas.length; i++) {
+    if (!prog.get(ordenadas[i].id)?.concluida) return { aula: ordenadas[i], rotulo: ultIdx >= 0 ? 'Continuar' : 'Assistir', tipo: ultIdx >= 0 ? 'proximo' : 'inicio' };
+  }
+  const pend = ordenadas.find((a) => !prog.get(a.id)?.concluida);
+  if (pend) return { aula: pend, rotulo: 'Continuar', tipo: 'proximo' };
+  return { aula: ordenadas[0], rotulo: 'Assistir de novo', tipo: 'fim' };
+}
+
+// "Continuar assistindo": episódios iniciados e não concluídos + o próximo episódio de quem terminou um
+function listaContinuar(d) {
+  const itens = [], vistos = new Set();
+  for (const p of d.prog.values()) {
+    const a = d.aulaMap.get(p.aulaId);
+    if (a && d.porCurso.has(a.cursoId) && !p.concluida && p.posicao > 5) { itens.push({ a, p, t: p.atualizadoEm || 0, tipo: 'parou' }); vistos.add(a.id); }
+  }
+  for (const c of d.cursos) {
+    const s = d.porCurso.get(c.id);
+    if (!s.ultima || statusCurso(s) === 'concluido') continue;
+    const alvo = aulaParaContinuar(s.ord, d.prog);
+    if (alvo.tipo === 'proximo' && !vistos.has(alvo.aula.id)) itens.push({ a: alvo.aula, p: d.prog.get(alvo.aula.id), t: s.ultima, tipo: 'proximo' });
+  }
+  return itens.sort((x, y) => y.t - x.t).slice(0, 20);
+}
+
+/* =========================================================
+   Telas
+   ========================================================= */
+const app = $('#app');
+let tokenTela = 0;
+
+function fileira(titulo, cards, qtd, link) {
+  return `<section class="secao">
+    <div class="secao-cab"><h2>${esc(titulo)}</h2>${qtd ? `<span>${qtd}</span>` : ''}${link ? `<a href="${link}">Ver tudo ›</a>` : ''}</div>
+    <div class="fileira-wrap">
+      <button class="seta esq" data-acao="rolar" data-dir="-1" aria-label="Rolar para a esquerda">‹</button>
+      <div class="fileira">${cards}</div>
+      <button class="seta dir" data-acao="rolar" data-dir="1" aria-label="Rolar para a direita">›</button>
+    </div></section>`;
+}
+
+function avisosSuporte() {
+  if (!window.isSecureContext) return `<div class="aviso">Abra este app por um endereço <b>https://</b> ou <b>http://localhost</b>. Abrindo o arquivo direto (file://) o armazenamento não funciona.</div>`;
+  if (!SUPORTE.opfs) return `<div class="aviso">Este navegador não guarda arquivos (OPFS). Use Safari no iOS 16.4+ ou Chrome/Edge atualizados.</div>`;
+  if (SUPORTE.ios && !SUPORTE.instalado) return `<div class="aviso"><b>Dica:</b> instale o app para ter mais espaço e não perder os vídeos: toque em <b>Compartilhar</b> › <b>Adicionar à Tela de Início</b>.</div>`;
+  return '';
+}
+
+function cardCurso(c, s, url, largo = false) {
+  const pct = pctCurso(s), st = statusCurso(s);
+  const selo = st === 'concluido' ? '<span class="selo ok">Concluído</span>' : st === 'novo' ? '<span class="selo">Novo</span>' : '';
+  return `<button class="card ${largo ? 'largo' : ''}" data-acao="abrir-curso" data-id="${c.id}">
+    <div class="thumb">${capaHtml(c, url, s.ord[0])}${selo}${pct && pct < 100 ? `<div class="barra"><i style="width:${pct}%"></i></div>` : ''}</div>
+    <div class="card-titulo">${esc(c.nome)}</div>
+    <div class="card-sub"><b>${s.concluidas}</b> de ${plural(s.aulas.length, 'aula', 'aulas')}${s.duracao ? ' · ' + fmtDuracao(s.duracao) : ''}</div></button>`;
+}
+
+async function telaInicio(token) {
+  const d = await carregarTudo();
+  if (token !== tokenTela) return;
+  if (!d.cursos.length) {
+    app.innerHTML = `<div class="vazio"><div class="vazio-caixa">
+      ${avisosSuporte()}
+      <div class="marca-icone vazio-logo">${ICONE.playCheio}</div>
+      <h1>Seus cursos, sempre com você.</h1>
+      <p>Assista às suas aulas como uma série, sem internet. Tudo fica guardado neste aparelho.</p>
+      <ol class="passos">
+        <li><b>1</b><div><strong>Um zip por curso</strong>O nome do zip vira o nome do curso. Subpastas viram módulos.</div></li>
+        <li><b>2</b><div><strong>Importe</strong>Toque em Importar e escolha o zip no app Arquivos.</div></li>
+        <li><b>3</b><div><strong>Maratone</strong>O app lembra onde você parou e já emenda o próximo episódio.</div></li>
+      </ol>
+      <button class="btn btn-verm" data-acao="importar">${ICONE.mais}Importar curso</button>
+    </div></div>`;
+    return;
+  }
+  const urls = new Map();
+  await Promise.all(d.cursos.map(async (c) => urls.set(c.id, await capaUrl(c))));
+  const continuar = listaContinuar(d);
+  await miniaturas([...continuar.map((x) => x.a), ...[...d.porCurso.values()].map((s) => s.ord[0])]);
+  if (token !== tokenTela) return;
+
+  const cursoPorId = new Map(d.cursos.map((c) => [c.id, c]));
+  const recentes = d.cursos.slice().sort((a, b) => (d.porCurso.get(b.id).ultima - d.porCurso.get(a.id).ultima) || ((b.criadoEm || 0) - (a.criadoEm || 0)));
+  const ativos = recentes.filter((c) => statusCurso(d.porCurso.get(c.id)) !== 'concluido');
+  const concluidos = recentes.filter((c) => statusCurso(d.porCurso.get(c.id)) === 'concluido');
+
+  // Destaque
+  let hero;
+  const epLinha = (a) => `<div class="hero-ep"><b>E${d.num.get(a.id)}</b>${esc(a.titulo)}</div>`;
+  if (continuar.length) {
+    const { a, p, tipo } = continuar[0], c = cursoPorId.get(a.cursoId), s = d.porCurso.get(c.id);
+    const pct = pctAula(p, a);
+    hero = `<section class="hero"><div class="hero-fundo">${capaHtml(c, urls.get(c.id), urlsMini.has(a.id) ? a : s.ord[0])}</div>
+      <div class="hero-conteudo">
+        <span class="pill"><i></i>${tipo === 'proximo' ? 'Próximo episódio' : 'Continuar assistindo'}</span>
+        <h1>${esc(c.nome)}</h1>
+        ${epLinha(a)}
+        <div class="hero-meta">${a.modulo ? esc(a.modulo) + ' · ' : ''}${pctCurso(s)}% do curso concluído</div>
+        ${pct > 0 ? `<div class="hero-progresso"><div class="barra"><i style="width:${pct}%"></i></div>${p?.duracao ? 'faltam ' + fmtDuracao(p.duracao - p.posicao) : ''}</div>` : ''}
+        <div class="hero-botoes">
+          <button class="btn btn-primario" data-acao="assistir" data-id="${a.id}">${ICONE.play}${tipo === 'proximo' ? 'Assistir' : 'Continuar'}</button>
+          <button class="btn" data-acao="abrir-curso" data-id="${c.id}">${ICONE.info}Episódios</button>
+        </div></div></section>`;
+  } else {
+    const c = ativos[0] || recentes[0], s = d.porCurso.get(c.id), alvo = aulaParaContinuar(s.ord, d.prog);
+    hero = `<section class="hero"><div class="hero-fundo">${capaHtml(c, urls.get(c.id), s.ord[0])}</div>
+      <div class="hero-conteudo">
+        <span class="pill"><i></i>${statusCurso(s) === 'novo' ? 'Novo curso' : 'Curso'}</span>
+        <h1>${esc(c.nome)}</h1>
+        <div class="hero-meta">${plural(s.aulas.length, 'episódio', 'episódios')}${s.duracao ? ' · ' + fmtDuracao(s.duracao) : ''} · ${pctCurso(s)}% concluído</div>
+        <div class="hero-botoes">
+          <button class="btn btn-primario" data-acao="assistir" data-id="${alvo.aula.id}">${ICONE.play}${alvo.rotulo}</button>
+          <button class="btn" data-acao="abrir-curso" data-id="${c.id}">${ICONE.info}Episódios</button>
+        </div></div></section>`;
+  }
+
+  const cardsCont = continuar.map(({ a, p, tipo }) => {
+    const c = cursoPorId.get(a.cursoId);
+    const resta = p?.duracao ? 'faltam ' + fmtDuracao(p.duracao - p.posicao) : '';
+    return `<button class="card largo" data-acao="assistir" data-id="${a.id}">
+      <div class="thumb">${thumbEpCard(a, c, urls.get(c.id), p)}
+        <div class="play-sobre"><span>${ICONE.play}</span></div>
+        ${tipo === 'proximo' ? '<span class="selo">Próximo</span>' : ''}</div>
+      <div class="card-titulo">E${d.num.get(a.id)} · ${esc(a.titulo)}</div>
+      <div class="card-sub">${esc(c.nome)}${resta ? ' · ' + resta : ''}</div></button>`;
+  }).join('');
+
+  app.innerHTML = hero + avisosSuporte() +
+    (cardsCont ? fileira('Continuar assistindo', cardsCont) : '') +
+    (ativos.length ? fileira('Meus cursos', ativos.map((c) => cardCurso(c, d.porCurso.get(c.id), urls.get(c.id))).join(''), ativos.length, '#/biblioteca') : '') +
+    (concluidos.length ? fileira('Concluídos', concluidos.map((c) => cardCurso(c, d.porCurso.get(c.id), urls.get(c.id))).join(''), concluidos.length) : '');
+
+  // Primeiro o que está na tela, depois os episódios em ordem
+  Processador.adicionar([...continuar.map((x) => x.a), ...[...d.porCurso.values()].flatMap((s) => s.ord)]);
+}
+
+// Miniatura grande do episódio (cards "Continuar assistindo")
+function thumbEpCard(a, c, capa, p) {
+  const mini = urlsMini.get(a.id);
+  const pct = pctAula(p, a);
+  const fundo = mini ? `<div class="capa com-mini" data-mini="${a.id}" style="background-image:url('${mini}')"></div>`
+    : capa ? `<div class="capa" style="background-image:url('${capa}')"></div>`
+    : `<div class="capa gerada" data-mini="${a.id}" style="--h:${matiz(c.nome)}"><span class="iniciais">${esc(iniciais(c.nome))}</span></div>`;
+  return fundo + (pct > 0 && pct < 100 ? `<div class="barra"><i style="width:${pct}%"></i></div>` : '');
+}
+
+let filtroBib = 'todos';
+async function telaBiblioteca(token) {
+  const d = await carregarTudo();
+  const urls = new Map();
+  await Promise.all(d.cursos.map(async (c) => urls.set(c.id, await capaUrl(c))));
+  await miniaturas([...d.porCurso.values()].map((s) => s.ord[0]));
+  if (token !== tokenTela) return;
+  const totalAulas = d.aulas.length;
+  const feitas = [...d.porCurso.values()].reduce((s, x) => s + x.concluidas, 0);
+  const assistido = [...d.porCurso.values()].reduce((s, x) => s + x.assistido, 0);
+  const cont = { todos: d.cursos.length, andamento: 0, novo: 0, concluido: 0 };
+  d.cursos.forEach((c) => { const st = statusCurso(d.porCurso.get(c.id)); if (cont[st] !== undefined) cont[st]++; });
+  const lista = d.cursos
+    .filter((c) => filtroBib === 'todos' || statusCurso(d.porCurso.get(c.id)) === filtroBib)
+    .sort((a, b) => (d.porCurso.get(b.id).ultima - d.porCurso.get(a.id).ultima) || colator.compare(a.nome, b.nome));
+  const chip = (v, r) => `<button class="chip ${filtroBib === v ? 'ativo' : ''}" data-acao="filtro-bib" data-valor="${v}">${r} · ${cont[v]}</button>`;
+
+  app.innerHTML = `<div class="pagina">
+    <h1 class="pagina-titulo">Biblioteca</h1>
+    <div class="stats">
+      <div class="stat"><b>${d.cursos.length}</b><span>${d.cursos.length === 1 ? 'curso' : 'cursos'}</span></div>
+      <div class="stat"><b>${feitas}<small style="font-size:14px;color:var(--txt3)">/${totalAulas}</small></b><span>aulas assistidas</span></div>
+      <div class="stat"><b>${assistido >= 3600 ? Math.floor(assistido / 3600) + 'h' : Math.round(assistido / 60) + 'min'}</b><span>de estudo</span></div>
+    </div>
+    <div class="chips">${chip('todos', 'Todos')}${chip('andamento', 'Em andamento')}${chip('novo', 'Não iniciados')}${chip('concluido', 'Concluídos')}</div>
+    ${lista.length ? `<div class="grade">${lista.map((c) => cardCurso(c, d.porCurso.get(c.id), urls.get(c.id))).join('')}</div>`
+      : `<div class="vazio-lista">${d.cursos.length ? 'Nenhum curso neste filtro.' : 'Nenhum curso ainda. Toque em <b>Importar</b> para começar.'}</div>`}
+  </div>`;
+}
+
+const estadoCurso = new Map(); // cursoId -> { abertos:Set, filtro }
+
+async function telaCurso(id, token) {
+  const [curso, aulas, progs] = await Promise.all([DB.get('cursos', id), DB.aulasDoCurso(id), DB.todos('progresso')]);
+  if (token !== tokenTela) return;
+  if (!curso) { app.innerHTML = `<div class="pagina"><h1 class="pagina-titulo">Curso não encontrado</h1><a href="#/" class="btn btn-sec">Voltar ao início</a></div>`; return; }
+  const url = await capaUrl(curso);
+  const ord = ordenarAulas(aulas);
+  await miniaturas(ord);
+  if (token !== tokenTela) return;
+  const prog = new Map(progs.map((p) => [p.aulaId, p]));
+  const concl = ord.filter((a) => prog.get(a.id)?.concluida).length;
+  const pct = ord.length ? Math.round((concl / ord.length) * 100) : 0;
+  const tam = ord.reduce((s, a) => s + (a.tamanho || 0), 0);
+  const dur = ord.reduce((s, a) => s + (a.duracao || 0), 0);
+  const alvo = ord.length ? aulaParaContinuar(ord, prog) : null;
+  const num = new Map(ord.map((a, i) => [a.id, i + 1]));
+
+  const mods = new Map();
+  for (const a of ord) { if (!mods.has(a.modulo)) mods.set(a.modulo, []); mods.get(a.modulo).push(a); }
+  if (!estadoCurso.has(id)) estadoCurso.set(id, { abertos: new Set(alvo ? [alvo.aula.modulo] : []), filtro: 'todas' });
+  const est = estadoCurso.get(id);
+  const linha = (a) => linhaEp(a, prog.get(a.id), num.get(a.id), alvo && alvo.aula.id === a.id);
+
+  let htmlEps;
+  if (mods.size <= 1) {
+    htmlEps = ord.map(linha).join('');
+  } else {
+    htmlEps = [...mods.entries()].map(([mod, lista]) => {
+      const feitas = lista.filter((a) => prog.get(a.id)?.concluida).length;
+      const durMod = lista.reduce((s, a) => s + (a.duracao || 0), 0);
+      return `<details class="modulo" data-modulo="${esc(mod)}" ${est.abertos.has(mod) ? 'open' : ''}>
+        <summary>
+          <span class="seta-mod">${ICONE.chevron}</span>
+          <div class="mod-nome">${esc(nomeModulo(mod))}
+            <small>${plural(lista.length, 'episódio', 'episódios')}${durMod ? ' · ' + fmtDuracao(durMod) : ''} · ${feitas}/${lista.length}
+              <span class="barra ${feitas === lista.length ? 'ok' : ''}"><i style="width:${Math.round(feitas / lista.length * 100)}%"></i></span></small></div>
+          <button class="icone" data-acao="apagar-modulo" data-id="${curso.id}" data-modulo="${encodeURIComponent(mod)}" aria-label="Apagar módulo" title="Apagar módulo">${ICONE.lixo}</button>
+        </summary>
+        <div>${lista.map(linha).join('')}</div>
+      </details>`;
+    }).join('');
+  }
+
+  const chipF = (v, r) => `<button class="chip ${est.filtro === v ? 'ativo' : ''}" data-acao="filtro-ep" data-id="${id}" data-valor="${v}">${r}</button>`;
+  app.innerHTML = `
+    <section class="curso-topo"><div class="curso-fundo">${capaHtml(curso, url, ord[0])}</div>
+      <div class="curso-info">
+        <span class="pill"><i></i>Curso</span>
+        <h1>${esc(curso.nome)}</h1>
+        <div class="metas"><span>${plural(ord.length, 'episódio', 'episódios')}</span>${mods.size > 1 ? `<span>${mods.size} módulos</span>` : ''}${dur ? `<span>${fmtDuracao(dur)}</span>` : ''}<span>${fmtBytes(tam)}</span></div>
+        <div class="progresso-curso"><div class="barra grossa ${pct === 100 ? 'ok' : ''}"><i style="width:${pct}%"></i></div><b>${pct}% · ${concl}/${ord.length}</b></div>
+        ${alvo ? `<div class="curso-acoes">
+          <button class="btn btn-primario" data-acao="assistir" data-id="${alvo.aula.id}">${ICONE.play}${alvo.rotulo} · E${num.get(alvo.aula.id)}</button>
+          <div class="prox-ep"><b>E${num.get(alvo.aula.id)}</b> · ${esc(alvo.aula.titulo)}${prog.get(alvo.aula.id)?.posicao > 5 && !prog.get(alvo.aula.id)?.concluida ? ' · parou em ' + fmtTempo(prog.get(alvo.aula.id).posicao) : ''}</div>
+        </div>` : ''}
+      </div></section>
+    <section class="episodios">
+      <div class="episodios-cab"><h2>Episódios</h2><div class="chips">${chipF('todas', 'Todos')}${chipF('pendentes', 'Não assistidos')}${chipF('assistidas', 'Assistidos')}</div></div>
+      <div class="lista-eps" data-filtro="${est.filtro}">${htmlEps}</div>
+      <div class="gerenciar">
+        <h3>Gerenciar curso</h3>
+        <p>Este curso ocupa ${fmtBytes(tam)} neste aparelho. Apagar remove os vídeos e o progresso.</p>
+        <div class="botoes" style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-sec btn-peq" data-acao="renomear-curso" data-id="${curso.id}">${ICONE.editar}Renomear</button>
+          <button class="btn btn-perigo btn-peq" data-acao="apagar-curso" data-id="${curso.id}">${ICONE.lixo}Apagar curso</button>
+        </div>
+      </div>
+    </section>`;
+
+  $$('.modulo', app).forEach((det) => det.addEventListener('toggle', () => {
+    const m = det.dataset.modulo;
+    if (det.open) est.abertos.add(m); else est.abertos.delete(m);
+  }));
+  Processador.adicionar(ord);
+}
+
+function linhaEp(a, p, num, atual) {
+  const feita = !!p?.concluida;
+  const meta = feita ? '✓ Assistido' : p && p.posicao > 5 ? `Parou em ${fmtTempo(p.posicao)}${a.duracao ? ' de ' + fmtTempo(a.duracao) : ''}` : (a.duracao ? fmtDuracao(a.duracao) : '');
+  return `<div class="ep ${feita ? 'assistida' : ''} ${atual ? 'atual' : ''}" data-aula="${a.id}">
+    <button class="ep-play" data-acao="assistir" data-id="${a.id}">
+      ${thumbEp(a, num, p)}
+      <div class="ep-info"><div class="ep-titulo"><span class="n">${num}.</span>${esc(a.titulo)}</div>${meta ? `<div class="ep-meta">${meta}</div>` : ''}</div>
+    </button>
+    <button class="icone ep-check" data-acao="alternar-concluida" data-id="${a.id}" aria-label="${feita ? 'Desmarcar como assistido' : 'Marcar como assistido'}" title="${feita ? 'Desmarcar como assistido' : 'Marcar como assistido'}">${ICONE.checkCirc}</button>
+  </div>`;
+}
+
+async function telaAjustes(token) {
+  let est = {}, persist = false;
+  try { est = await navigator.storage.estimate(); } catch (e) {}
+  try { persist = await navigator.storage.persisted(); } catch (e) {}
+  const d = await carregarTudo();
+  const urls = new Map();
+  await Promise.all(d.cursos.map(async (c) => urls.set(c.id, await capaUrl(c))));
+  await miniaturas([...d.porCurso.values()].map((s) => s.ord[0]));
+  if (token !== tokenTela) return;
+  const usado = est.usage || 0, quota = est.quota || 0;
+  const pct = quota ? Math.min(100, (usado / quota) * 100) : 0;
+  const cursos = d.cursos.slice().sort((a, b) => d.porCurso.get(b.id).tamanho - d.porCurso.get(a.id).tamanho);
+  const sim = (v) => v ? '<b>sim</b>' : '<b class="nao">não</b>';
+
+  app.innerHTML = `<div class="pagina">
+    <h1 class="pagina-titulo">Ajustes</h1>
+    ${avisosSuporte()}
+    <section class="cartao">
+      <h2>${ICONE.disco}Armazenamento</h2>
+      <div class="espaco-num">${fmtBytes(usado)} <small>usados</small></div>
+      <div class="barra grossa"><i style="width:${pct.toFixed(1)}%"></i></div>
+      <div class="legenda"><span>Livre para o app: <b style="color:var(--txt)">${fmtBytes(Math.max(0, quota - usado))}</b></span><span>Limite: ${fmtBytes(quota)}</span></div>
+      <p class="nota">O limite é definido pelo <b>navegador</b>, não pelo app. No iPhone, com o app <b>instalado na Tela de Início</b>, o iOS permite usar até cerca de 60% do armazenamento do aparelho. No Chrome/Edge do PC, até cerca de 60% do disco. Para caber mais, libere espaço no aparelho.</p>
+      <p style="margin:0 0 10px">Armazenamento persistente: ${persist ? '<b style="color:var(--ok)">ativado</b> — o sistema não apaga seus vídeos sozinho.' : '<b style="color:#ffd98a">não confirmado</b>.'}</p>
+      ${persist ? '' : '<div class="botoes"><button class="btn btn-sec btn-peq" data-acao="persistir">Pedir armazenamento persistente</button></div>'}
+    </section>
+    <section class="cartao">
+      <h2>${ICONE.grade}Cursos neste aparelho</h2>
+      ${cursos.length ? `<ul class="lista-simples">${cursos.map((c) => {
+        const s = d.porCurso.get(c.id);
+        return `<li><div class="mini-capa">${capaHtml(c, urls.get(c.id), s.ord[0])}</div>
+          <div class="li-txt"><div>${esc(c.nome)}</div><div>${plural(s.aulas.length, 'aula', 'aulas')} · ${fmtBytes(s.tamanho)} · ${pctCurso(s)}%</div></div>
+          <button class="icone" data-acao="apagar-curso" data-id="${c.id}" aria-label="Apagar ${esc(c.nome)}" title="Apagar curso">${ICONE.lixo}</button></li>`;
+      }).join('')}</ul>` : '<p>Nenhum curso importado.</p>'}
+    </section>
+    <section class="cartao">
+      <h2>${ICONE.seta}Progresso</h2>
+      <p>Leve seu progresso para outro aparelho. A correspondência é feita pelo nome do curso + caminho da aula.</p>
+      <div class="botoes">
+        <button class="btn btn-sec btn-peq" data-acao="exportar-progresso">Exportar</button>
+        <button class="btn btn-sec btn-peq" data-acao="importar-progresso">Importar</button>
+      </div>
+    </section>
+    <section class="cartao">
+      <h2>${ICONE.lixo}Apagar tudo</h2>
+      <p>Remove todos os cursos, vídeos e progresso deste aparelho.</p>
+      <button class="btn btn-perigo btn-peq" data-acao="apagar-tudo">Apagar tudo</button>
+    </section>
+    <section class="cartao">
+      <h2>${ICONE.celular}Este aparelho</h2>
+      <div class="diag">
+        <span>Armazenamento de arquivos</span>${sim(SUPORTE.opfs)}
+        <span>Zip com compressão</span>${sim(SUPORTE.deflate)}
+        <span>Funciona offline</span>${sim(!!navigator.serviceWorker?.controller)}
+        <span>Instalado como app</span>${sim(SUPORTE.instalado)}
+      </div>
+      <p style="margin:14px 0 0;font-size:13px">${APP} · versão 2.0 · seus vídeos ficam só neste aparelho.</p>
+    </section>
+  </div>`;
+}
+
+/* =========================================================
+   Rotas (#/, #/biblioteca, #/curso/ID, #/assistir/ID, #/ajustes)
+   ========================================================= */
+let navegouNoApp = false;
+let rotaBase = null;
+
+function lerRota() {
+  const partes = location.hash.replace(/^#\/?/, '').split('/');
+  return { rota: partes[0] || '', id: decodeURIComponent(partes[1] || '') };
+}
+
+async function rotear({ manterScroll = false } = {}) {
+  const { rota, id } = lerRota();
+  if (rota === 'assistir' && id) { await Player.abrir(id); return; }
+  const vinhaDoPlayer = Player.ativo;
+  Player.sair();
+  const chave = rota + '/' + id;
+  const manter = manterScroll || (vinhaDoPlayer && rotaBase === chave && app.childElementCount > 0);
+  const y = window.scrollY;
+  rotaBase = chave;
+  $('#btn-voltar').hidden = rota !== 'curso';
+  $$('[data-aba]').forEach((el) => el.classList.toggle('ativo', el.dataset.aba === (rota === 'curso' ? '' : rota)));
+  const token = ++tokenTela;
+  if (rota === 'curso') await telaCurso(id, token);
+  else if (rota === 'biblioteca') await telaBiblioteca(token);
+  else if (rota === 'ajustes') await telaAjustes(token);
+  else await telaInicio(token);
+  if (token !== tokenTela) return;
+  window.scrollTo(0, manter ? y : 0);
+  atualizarTopo();
+  document.title = rota === 'curso' ? ($('.curso-info h1')?.textContent || APP) + ' · ' + APP
+    : rota === 'biblioteca' ? 'Biblioteca · ' + APP : rota === 'ajustes' ? 'Ajustes · ' + APP : APP;
+}
+
+const rerenderizar = () => rotear({ manterScroll: true });
+
+function voltar(padrao = '#/') {
+  if (navegouNoApp && history.length > 1) history.back();
+  else location.replace(padrao);
+}
+
+// Cabeçalho sólido ao rolar (e sempre nas páginas sem imagem de fundo)
+function atualizarTopo() {
+  const r = lerRota().rota;
+  $('#topo').classList.toggle('solido', window.scrollY > 30 || r === 'ajustes' || r === 'biblioteca');
+}
+
+window.addEventListener('hashchange', () => { navegouNoApp = true; rotear(); });
+window.addEventListener('scroll', atualizarTopo, { passive: true });
+
+/* =========================================================
+   Player
+   ========================================================= */
+const Player = {
+  ativo: false, aula: null, curso: null, lista: [], prog: null, url: null,
+  retomado: false, bloqueioAuto: false, token: 0, contagemTimer: null, posAlvo: 0, ultimaSessao: 0,
+  get v() { return $('#video'); },
+
+  init() {
+    const v = this.v;
+    v.addEventListener('loadedmetadata', () => this.aoCarregar());
+    v.addEventListener('canplay', () => {
+      // iOS às vezes ignora o seek feito cedo demais; reaplica uma vez
+      if (this.posAlvo > 0 && v.currentTime < 1) { try { v.currentTime = this.posAlvo; } catch (e) {} }
+      this.posAlvo = 0;
+    });
+    v.addEventListener('timeupdate', () => this.aoTempo());
+    v.addEventListener('pause', () => this.salvar());
+    v.addEventListener('play', () => this.pararContagem());
+    v.addEventListener('ended', () => this.aoTerminar());
+    v.addEventListener('ratechange', () => {
+      if (!this.ativo || !this.retomado) return;
+      // Também guarda a velocidade escolhida pelos controles nativos
+      if (VELOCIDADES.includes(v.playbackRate)) { salvarPref('velocidade', v.playbackRate); v.defaultPlaybackRate = v.playbackRate; }
+      this.rotuloVelocidade();
+    });
+    v.addEventListener('error', () => {
+      if (!this.aula || !v.getAttribute('src')) return;
+      this.mostrarErro(`Não foi possível reproduzir este vídeo neste aparelho.<br><small>Formato: .${esc(this.aula.ext)}. No iPhone, prefira MP4 com H.264/AAC.</small>`);
+    });
+    // Salva a posição a cada 5 s e ao sair/ocultar o app
+    setInterval(() => { if (this.ativo && !v.paused) this.salvar(); }, 5000);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') this.salvar(); });
+    window.addEventListener('pagehide', () => this.salvar());
+    this.configurarSessao();
+    this.rotuloVelocidade();
+  },
+
+  async abrir(id) {
+    if (!this.ativo) {
+      this.ativo = true;
+      $('#player').hidden = false;
+      document.body.classList.add('com-player');
+    }
+    await this.carregarAula(id);
+  },
+
+  async carregarAula(id) {
+    const token = ++this.token;
+    await this.salvar();
+    this.pararContagem();
+    $('#pl-erro').hidden = true;
+    const aula = await DB.get('aulas', id);
+    if (token !== this.token) return;
+    if (!aula) { toast('Episódio não encontrado'); location.replace('#/'); return; }
+    const [curso, aulas, prog] = await Promise.all([DB.get('cursos', aula.cursoId), DB.aulasDoCurso(aula.cursoId), DB.get('progresso', id)]);
+    if (token !== this.token) return;
+    this.aula = aula; this.curso = curso || { id: aula.cursoId, nome: '' };
+    this.lista = ordenarAulas(aulas);
+    this.prog = prog || { aulaId: id, posicao: 0, concluida: false, atualizadoEm: 0 };
+    this.retomado = false; this.bloqueioAuto = false; this.posAlvo = 0;
+
+    const idx = this.lista.findIndex((a) => a.id === id);
+    $('#pl-curso').textContent = [this.curso.nome, aula.modulo].filter(Boolean).join(' · ');
+    $('#pl-aula').innerHTML = `<span class="n">E${idx + 1}</span>${esc(aula.titulo)}`;
+    document.title = aula.titulo + ' · ' + APP;
+    $('#pl-anterior').disabled = idx <= 0;
+    $('#pl-proxima').disabled = idx < 0 || idx >= this.lista.length - 1;
+    this.atualizarBotaoConcluida();
+    this.renderLista();
+
+    const v = this.v;
+    let arquivo;
+    try { arquivo = await OPFS.arquivo(aula.caminho); }
+    catch (e) {
+      if (token !== this.token) return;
+      v.removeAttribute('src'); v.load();
+      this.mostrarErro('O arquivo deste vídeo não foi encontrado no aparelho. Importe o curso novamente.');
+      return;
+    }
+    if (token !== this.token) return;
+    // Troca de episódio: revoga a URL anterior
+    if (this.url) URL.revokeObjectURL(this.url);
+    this.url = URL.createObjectURL(arquivo.slice(0, arquivo.size, EXT_VIDEO[aula.ext] || 'video/mp4'));
+    v.defaultPlaybackRate = lerPref('velocidade', 1);
+    v.src = this.url;
+    this.atualizarSessao();
+    const tentativa = v.play();
+    if (tentativa && tentativa.catch) tentativa.catch(() => {}); // sem gesto o navegador pode bloquear: o usuário toca no play
+  },
+
+  aoCarregar() {
+    if (!this.aula) return;
+    const v = this.v, d = v.duration;
+    const vel = lerPref('velocidade', 1);
+    v.defaultPlaybackRate = vel; v.playbackRate = vel;
+    // Retoma de onde parou; se faltar menos de 10 s, começa do início
+    let pos = this.prog.posicao || 0;
+    if (!isFinite(d) || d - pos <= 10) pos = 0;
+    if (pos > 0) { try { v.currentTime = pos; } catch (e) {} this.posAlvo = pos; }
+    this.retomado = true;
+    if (isFinite(d) && d > 0 && Math.abs((this.aula.duracao || 0) - d) > 1) {
+      this.aula.duracao = d;
+      DB.get('aulas', this.aula.id).then((a) => { if (a) { a.duracao = d; return DB.put('aulas', a); } }).catch(() => {});
+    }
+    this.rotuloVelocidade();
+    this.posicaoSessao(true);
+  },
+
+  aoTempo() {
+    if (!this.retomado || !this.aula) return;
+    const v = this.v, d = v.duration;
+    // Concluída ao atingir 90%
+    if (isFinite(d) && d > 0 && !this.prog.concluida && !this.bloqueioAuto && v.currentTime / d >= 0.9) {
+      this.prog.concluida = true;
+      this.salvar();
+      this.atualizarBotaoConcluida();
+      this.renderLista();
+    }
+    this.posicaoSessao();
+  },
+
+  async salvar() {
+    const aula = this.aula, v = this.v;
+    if (!this.ativo || !aula || !this.retomado) return;
+    const d = v.duration;
+    if (!isFinite(d) || d <= 0) return;
+    this.prog = { ...this.prog, aulaId: aula.id, posicao: v.currentTime, duracao: d, atualizadoEm: Date.now() };
+    try { await DB.put('progresso', this.prog); } catch (e) {}
+  },
+
+  async aoTerminar() {
+    if (!this.aula) return;
+    if (!this.bloqueioAuto) this.prog.concluida = true;
+    await this.salvar();
+    this.atualizarBotaoConcluida();
+    this.renderLista();
+    const prox = this.vizinha(1);
+    if (prox) this.iniciarContagem(prox);
+  },
+
+  vizinha(delta) {
+    const i = this.lista.findIndex((a) => a.id === this.aula?.id);
+    return i < 0 ? null : this.lista[i + delta] || null;
+  },
+
+  irPara(aula) { if (aula) location.replace('#/assistir/' + encodeURIComponent(aula.id)); },
+
+  // Próximo episódio com contagem de 5 s cancelável
+  iniciarContagem(prox) {
+    this.pararContagem();
+    let n = 5;
+    const anel = $('#cont-anel');
+    const idx = this.lista.indexOf(prox) + 1;
+    $('#cont-num').textContent = n;
+    $('#cont-titulo').textContent = `E${idx} · ${prox.titulo}`;
+    const mini = urlsMini.get(prox.id);
+    $('#contagem').style.backgroundImage = mini ? `url('${mini}')` : '';
+    anel.style.transition = 'none'; anel.style.strokeDashoffset = '0';
+    $('#contagem').hidden = false;
+    requestAnimationFrame(() => { anel.style.transition = ''; anel.style.strokeDashoffset = String(176 / 5); });
+    this.contagemTimer = setInterval(() => {
+      n--;
+      $('#cont-num').textContent = n;
+      anel.style.strokeDashoffset = String(176 * Math.min(1, (6 - n) / 5));
+      if (n <= 0) { this.pararContagem(); this.irPara(prox); }
+    }, 1000);
+  },
+  pararContagem() { clearInterval(this.contagemTimer); this.contagemTimer = null; $('#contagem').hidden = true; },
+
+  pular(seg) {
+    const v = this.v;
+    if (!isFinite(v.duration)) return;
+    v.currentTime = Math.max(0, Math.min(v.duration - 0.1, v.currentTime + seg));
+  },
+
+  trocarVelocidade() {
+    const atual = lerPref('velocidade', 1);
+    const prox = VELOCIDADES[(VELOCIDADES.indexOf(atual) + 1) % VELOCIDADES.length];
+    salvarPref('velocidade', prox);
+    this.v.defaultPlaybackRate = prox; this.v.playbackRate = prox;
+    this.rotuloVelocidade();
+    toast('Velocidade ' + String(prox).replace('.', ',') + 'x', 1200);
+  },
+  rotuloVelocidade() { $('#pl-vel').textContent = String(lerPref('velocidade', 1)).replace('.', ',') + 'x'; },
+
+  async alternarConcluida() {
+    if (!this.aula) return;
+    this.prog.concluida = !this.prog.concluida;
+    this.bloqueioAuto = !this.prog.concluida; // desmarcou na mão: não remarca sozinho neste episódio
+    this.prog.atualizadoEm = Date.now();
+    await DB.put('progresso', { ...this.prog, aulaId: this.aula.id });
+    this.atualizarBotaoConcluida();
+    this.renderLista();
+    toast(this.prog.concluida ? 'Marcado como assistido' : 'Desmarcado', 1400);
+  },
+  atualizarBotaoConcluida() {
+    const b = $('#pl-concluida');
+    const sim = !!this.prog?.concluida;
+    b.classList.toggle('sim', sim);
+    b.title = sim ? 'Desmarcar como assistido' : 'Marcar como assistido';
+    b.setAttribute('aria-label', b.title);
+  },
+
+  async renderLista() {
+    if (!this.aula) return;
+    const aulaAtual = this.aula;
+    const [progs] = await Promise.all([DB.todos('progresso'), miniaturas(this.lista)]);
+    if (this.aula !== aulaAtual) return;
+    const prog = new Map(progs.map((p) => [p.aulaId, p]));
+    prog.set(this.aula.id, this.prog);
+    const prox = this.vizinha(1);
+    $('#pl-prox').innerHTML = prox ? `<button class="pl-prox" data-acao="assistir" data-id="${prox.id}">
+        ${thumbEp(prox, this.lista.indexOf(prox) + 1, prog.get(prox.id))}
+        <div><small>Próximo episódio</small><div class="t">E${this.lista.indexOf(prox) + 1} · ${esc(prox.titulo)}</div></div></button>` : '';
+    let html = `<h3>Episódios · ${esc(this.curso.nome)}</h3>`, modAtual = null;
+    const variosMods = new Set(this.lista.map((a) => a.modulo)).size > 1;
+    this.lista.forEach((a, i) => {
+      if (variosMods && a.modulo !== modAtual) { modAtual = a.modulo; html += `<h4>${esc(nomeModulo(a.modulo))}</h4>`; }
+      html += linhaEp(a, prog.get(a.id), i + 1, a.id === this.aula.id);
+    });
+    $('#pl-lista').innerHTML = html;
+  },
+
+  mostrarErro(html) { const e = $('#pl-erro'); e.innerHTML = `<div>${html}</div>`; e.hidden = false; },
+
+  sair() {
+    if (!this.ativo) return;
+    this.salvar();
+    this.token++;
+    this.pararContagem();
+    const v = this.v;
+    this.ativo = false; this.aula = null;
+    v.pause(); v.removeAttribute('src'); v.load();
+    if (this.url) { URL.revokeObjectURL(this.url); this.url = null; }
+    $('#player').hidden = true;
+    document.body.classList.remove('com-player');
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    if ('mediaSession' in navigator) navigator.mediaSession.metadata = null;
+    Processador.rodar();
+  },
+
+  fechar() { const cid = this.curso?.id; voltar(cid ? '#/curso/' + encodeURIComponent(cid) : '#/'); },
+
+  // Media Session: título na tela de bloqueio e botões de mídia
+  configurarSessao() {
+    if (!('mediaSession' in navigator)) return;
+    const v = this.v;
+    const acoes = {
+      play: () => v.play(),
+      pause: () => v.pause(),
+      seekbackward: (d) => this.pular(-(d.seekOffset || 10)),
+      seekforward: (d) => this.pular(d.seekOffset || 10),
+      seekto: (d) => { if (d.fastSeek && 'fastSeek' in v) v.fastSeek(d.seekTime); else v.currentTime = d.seekTime; },
+      previoustrack: () => this.irPara(this.vizinha(-1)),
+      nexttrack: () => this.irPara(this.vizinha(1))
+    };
+    for (const [acao, fn] of Object.entries(acoes)) { try { navigator.mediaSession.setActionHandler(acao, fn); } catch (e) {} }
+  },
+  async atualizarSessao() {
+    if (!('mediaSession' in navigator) || !this.aula) return;
+    const url = await capaUrl(this.curso);
+    const mini = urlsMini.get(this.aula.id);
+    const arte = url ? [{ src: url }] : mini ? [{ src: mini, sizes: '320x180', type: 'image/jpeg' }] : [{ src: arteGerada(this.curso), sizes: '512x512', type: 'image/png' }];
+    const idx = this.lista.findIndex((a) => a.id === this.aula.id) + 1;
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: `E${idx} · ${this.aula.titulo}`, artist: this.curso.nome, album: nomeModulo(this.aula.modulo), artwork: arte
+      });
+    } catch (e) {}
+  },
+  posicaoSessao(forcar) {
+    if (!('mediaSession' in navigator) || !navigator.mediaSession.setPositionState) return;
+    const agora = Date.now();
+    if (!forcar && agora - this.ultimaSessao < 4000) return;
+    this.ultimaSessao = agora;
+    const v = this.v;
+    if (!isFinite(v.duration) || v.duration <= 0) return;
+    try { navigator.mediaSession.setPositionState({ duration: v.duration, playbackRate: v.playbackRate || 1, position: Math.min(v.currentTime, v.duration) }); } catch (e) {}
+  }
+};
+
+/* =========================================================
+   Importação
+   ========================================================= */
+let importando = false;
+let wakeLock = null;
+
+function criarWorker() {
+  const src = $('#worker-src').textContent;
+  const url = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
+  const w = new Worker(url);
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  return w;
+}
+
+const Importador = {
+  async deZips(files) {
+    const planos = [], erros = [];
+    for (const f of files) {
+      if (!/\.zip$/i.test(f.name)) { erros.push(`${f.name}: não é um arquivo .zip`); continue; }
+      try {
+        const entradas = await ZIP.ler(f);
+        const itens = entradas.filter((e) => !e.pasta).map((e) => ({
+          caminho: e.nome, tamanho: e.tamanho, data: e.data,
+          fonte: { tipo: 'zip', file: f, offLocal: e.offLocal, metodo: e.metodo, comp: e.comp },
+          obs: (e.flags & 1) ? 'protegido por senha'
+            : (e.metodo !== 0 && e.metodo !== 8) ? 'método de compressão não suportado'
+            : (e.metodo === 8 && !SUPORTE.deflate) ? 'zip com compressão não suportado neste navegador — recrie o zip sem compressão'
+            : null
+        }));
+        planos.push(planejar(nomeDoZip(f.name), itens));
+      } catch (err) { erros.push(`${f.name}: ${err.message}`); }
+    }
+    await this.executar(planos, erros);
+  },
+
+  async dePasta(files) {
+    // webkitRelativePath = "Pasta do curso/Módulo/aula.mp4"
+    const grupos = new Map();
+    for (const f of files) {
+      const rel = (f.webkitRelativePath || f.name).replace(/\\/g, '/');
+      const partes = rel.split('/');
+      const curso = partes.length > 1 ? partes[0] : 'Curso';
+      if (!grupos.has(curso)) grupos.set(curso, []);
+      grupos.get(curso).push({ caminho: partes.slice(partes.length > 1 ? 1 : 0).join('/'), tamanho: f.size, data: f.lastModified, fonte: { tipo: 'arquivo', file: f } });
+    }
+    const planos = [...grupos].map(([nome, itens]) => planejar(nome.replace(/_+/g, ' ').trim(), itens));
+    await this.executar(planos, []);
+  },
+
+  async executar(planos, erros) {
+    if (!SUPORTE.opfs) {
+      await dialogo({ titulo: 'Sem suporte', html: '<p>Este navegador não permite guardar arquivos. Use Safari (iOS 16.4+) ou Chrome/Edge, por https ou localhost.</p>' });
+      return;
+    }
+    const cursos = await DB.todos('cursos');
+    const tarefas = [], metas = [], novos = [];
+    let jaExistiam = 0;
+    for (const p of planos) {
+      let curso = cursos.find((c) => c.nome.toLocaleLowerCase('pt-BR') === p.nomeCurso.toLocaleLowerCase('pt-BR'));
+      let existentes = new Set(), baseOrdem = 0;
+      if (curso && !novos.includes(curso)) {
+        const ja = await DB.aulasDoCurso(curso.id);
+        existentes = new Set(ja.map((a) => a.origem));
+        baseOrdem = ja.reduce((m, a) => Math.max(m, (a.ordem ?? -1) + 1), 0); // novas aulas entram depois
+      }
+      if (!curso) {
+        curso = { id: novoId(), nome: p.nomeCurso, capa: null, criadoEm: Date.now() };
+        cursos.push(curso); novos.push(curso);
+      }
+      if (p.capa && !curso.capa && !curso._capaPendente) {
+        curso._capaPendente = true;
+        const destino = `cursos/${curso.id}/capa.${p.capa.ext}`;
+        tarefas.push({ fonte: p.capa.fonte, destino, tamanho: p.capa.tamanho, rotulo: 'Capa', curso: curso.nome });
+        metas.push({ tipo: 'capa', cursoId: curso.id, caminho: destino });
+      }
+      for (const v of p.videos) {
+        if (existentes.has(v.rel)) { jaExistiam++; continue; } // reimportar continua de onde parou
+        existentes.add(v.rel);
+        const id = novoId();
+        const destino = `cursos/${curso.id}/${id}.${v.ext}`;
+        tarefas.push({ fonte: v.fonte, destino, tamanho: v.tamanho, rotulo: v.titulo, curso: curso.nome });
+        metas.push({ tipo: 'aula', aula: { id, cursoId: curso.id, modulo: v.modulo, titulo: v.titulo, origem: v.rel, ordem: baseOrdem + v.ordem, caminho: destino, ext: v.ext, tamanho: v.tamanho, duracao: null, criadoEm: Date.now() } });
+      }
+    }
+    const ignorados = planos.flatMap((p) => p.ignorados.map((i) => ({ ...i, curso: p.nomeCurso })));
+    const ocultos = planos.reduce((s, p) => s + p.ocultos, 0);
+    const semVideo = planos.filter((p) => !p.videos.length).map((p) => p.nomeCurso);
+
+    if (!metas.some((m) => m.tipo === 'aula')) {
+      novos.forEach((c) => delete c._capaPendente);
+      await this.relatorio({ ok: 0, cursos: 0, jaExistiam, ignorados, ocultos, erros, falhas: [], semVideo });
+      return;
+    }
+
+    // Confere espaço antes de começar (o limite é do navegador)
+    const total = tarefas.reduce((s, t) => s + t.tamanho, 0);
+    try {
+      const est = await navigator.storage.estimate();
+      const livre = (est.quota || 0) - (est.usage || 0);
+      if (est.quota && total > livre * 0.97) {
+        const seguir = await confirmar('Pode faltar espaço',
+          `<p>Esta importação precisa de <b>${fmtBytes(total)}</b>, mas o navegador informa <b>${fmtBytes(livre)}</b> livres para o app.</p>
+           <p>${SUPORTE.ios && !SUPORTE.instalado ? 'No iPhone, <b>instale o app na Tela de Início</b> para liberar muito mais espaço. ' : ''}Você também pode apagar cursos já assistidos em Ajustes.</p>`,
+          'Tentar mesmo assim');
+        if (!seguir) return;
+      }
+    } catch (e) {}
+    try { await navigator.storage.persist(); } catch (e) {}
+
+    for (const c of novos) { const { _capaPendente, ...limpo } = c; await DB.put('cursos', limpo); }
+    const resultado = await this.rodarWorker(tarefas, metas, total);
+    novos.forEach((c) => delete c._capaPendente);
+
+    // Cursos novos que ficaram vazios (cancelado/erro) são removidos
+    for (const c of novos) {
+      const aulas = await DB.aulasDoCurso(c.id);
+      if (!aulas.length) { await DB.apagar([], c.id); await OPFS.remover('cursos/' + c.id); esquecerCapa(c.id); }
+    }
+    const okAulas = metas.filter((m, i) => m.tipo === 'aula' && resultado.ok.has(i)).map((m) => m.aula);
+    rerenderizar();
+    await this.relatorio({
+      ok: okAulas.length, cursos: new Set(okAulas.map((a) => a.cursoId)).size, jaExistiam, ignorados, ocultos, erros,
+      falhas: resultado.falhas, cancelado: resultado.cancelado, semEspaco: resultado.semEspaco, semVideo
+    });
+    Processador.adicionar(okAulas); // duração e miniaturas em segundo plano
+  },
+
+  rodarWorker(tarefas, metas, total) {
+    return new Promise(async (resolve) => {
+      importando = true;
+      try { wakeLock = await navigator.wakeLock?.request('screen'); } catch (e) { wakeLock = null; }
+      const m = abrirModal(`<h2>Importando</h2>
+        <div class="modal-corpo">
+          <div class="imp-pct" id="imp-pct">0%</div>
+          <div class="imp-arquivo" id="imp-arquivo"></div>
+          <div class="imp-curso" id="imp-curso"></div>
+          <div class="barra grossa"><i id="imp-barra" style="width:0%"></i></div>
+          <div class="imp-nums"><span id="imp-bytes"></span><span id="imp-vel"></span></div>
+          <p style="margin-top:16px;font-size:13px">Mantenha o app aberto e a tela ligada até terminar.</p>
+        </div>
+        <div class="modal-botoes"><button class="btn btn-sec" id="imp-cancelar">Cancelar</button></div>`, { fechavel: false });
+
+      const w = criarWorker();
+      const ok = new Set(), falhas = [];
+      let concluidos = 0, feitoAtual = 0, atual = 0, fila = Promise.resolve(), terminado = false;
+      const inicio = Date.now();
+
+      const pintar = () => {
+        const feito = concluidos + feitoAtual;
+        const pct = total ? Math.min(100, (feito / total) * 100) : 0;
+        $('#imp-pct').textContent = Math.floor(pct) + '%';
+        $('#imp-barra').style.width = pct.toFixed(2) + '%';
+        const t = tarefas[Math.min(atual, tarefas.length - 1)];
+        $('#imp-arquivo').textContent = `${Math.min(atual + 1, tarefas.length)} de ${tarefas.length} · ${t.rotulo}`;
+        $('#imp-curso').textContent = t.curso;
+        $('#imp-bytes').textContent = `${fmtBytes(feito)} de ${fmtBytes(total)}`;
+        const seg = (Date.now() - inicio) / 1000;
+        if (seg > 2 && feito > 0) {
+          const vel = feito / seg, resta = (total - feito) / vel;
+          $('#imp-vel').textContent = `${fmtBytes(vel)}/s · ~${resta > 90 ? Math.ceil(resta / 60) + ' min' : Math.ceil(resta) + ' s'}`;
+        }
+      };
+      pintar();
+
+      const finalizar = async (extra = {}) => {
+        if (terminado) return;
+        terminado = true;
+        await fila;
+        w.terminate();
+        m.fechar();
+        importando = false;
+        try { await wakeLock?.release(); } catch (e) {}
+        wakeLock = null;
+        resolve({ ok, falhas, ...extra });
+      };
+
+      // Cada item gravado vira registro na hora: se cancelar, o que já foi importado fica
+      const gravarMeta = async (meta) => {
+        if (meta.tipo === 'aula') await DB.put('aulas', meta.aula);
+        else {
+          const c = await DB.get('cursos', meta.cursoId);
+          if (c) { c.capa = meta.caminho; await DB.put('cursos', c); }
+        }
+      };
+
+      w.onmessage = ({ data: msg }) => {
+        if (terminado) return;
+        if (msg.tipo === 'progresso') { atual = msg.indice; feitoAtual = msg.feito; pintar(); }
+        else if (msg.tipo === 'itemOk') {
+          const i = msg.indice;
+          concluidos += tarefas[i].tamanho; feitoAtual = 0; atual = i + 1;
+          fila = fila.then(() => gravarMeta(metas[i])).then(() => ok.add(i)).catch((e) => falhas.push({ nome: tarefas[i].rotulo, mensagem: 'Erro ao salvar: ' + e.message }));
+          pintar();
+        } else if (msg.tipo === 'itemErro') {
+          const i = msg.indice;
+          concluidos += tarefas[i].tamanho; feitoAtual = 0; atual = i + 1;
+          falhas.push({ nome: tarefas[i].rotulo, mensagem: msg.mensagem });
+          pintar();
+          if (msg.fatal) finalizar({ semEspaco: true });
+        } else if (msg.tipo === 'falha') {
+          falhas.push({ nome: 'Importação', mensagem: msg.mensagem });
+          finalizar();
+        } else if (msg.tipo === 'fim') finalizar();
+      };
+      w.onerror = (e) => { falhas.push({ nome: 'Importação', mensagem: e.message || 'Erro no worker' }); finalizar(); };
+
+      $('#imp-cancelar').addEventListener('click', async () => {
+        const sim = await confirmar('Cancelar importação?', '<p>O que já foi importado fica salvo. Para continuar depois, importe o mesmo zip de novo — o que já existe é pulado.</p>', 'Cancelar importação', true);
+        if (!sim || terminado) return;
+        w.terminate();
+        const parcial = tarefas[atual];
+        if (parcial && !ok.has(atual)) await OPFS.remover(parcial.destino); // apaga o arquivo pela metade
+        finalizar({ cancelado: true });
+      });
+
+      w.postMessage({ tipo: 'extrair', tarefas: tarefas.map(({ fonte, destino, tamanho }) => ({ fonte, destino, tamanho })) });
+    });
+  },
+
+  async relatorio(r) {
+    const partes = [];
+    if (r.ok) partes.push(`<div class="sucesso"><span>${ICONE.check}</span><div><b>${plural(r.ok, 'episódio importado', 'episódios importados')}</b><br><small style="color:var(--txt2)">em ${plural(r.cursos, 'curso', 'cursos')}</small></div></div>`);
+    else if (!r.cancelado) partes.push(`<p>Nenhum episódio novo foi importado.</p>`);
+    if (r.cancelado) partes.push(`<p><b>Importação cancelada.</b> O que já foi copiado ficou salvo.</p>`);
+    if (r.jaExistiam) partes.push(`<p>${plural(r.jaExistiam, 'episódio já existia e foi pulado', 'episódios já existiam e foram pulados')}.</p>`);
+    if (r.semVideo?.length) partes.push(`<p>Sem vídeos compatíveis em: ${r.semVideo.map(esc).join(', ')}.</p>`);
+    if (r.semEspaco) partes.push(`<div class="alerta">O armazenamento encheu. Apague cursos já assistidos em Ajustes e importe de novo — o que já foi salvo será pulado.</div>`);
+    if (r.erros?.length) partes.push(`<div class="alerta">${r.erros.map(esc).join('<br>')}</div>`);
+    if (r.falhas?.length) partes.push(`<details open><summary>${plural(r.falhas.length, 'falha', 'falhas')}</summary><ul>${r.falhas.map((f) => `<li>${esc(f.nome)} — ${esc(f.mensagem)}</li>`).join('')}</ul></details>`);
+    if (r.ignorados?.length) {
+      partes.push(`<details><summary>${plural(r.ignorados.length, 'arquivo ignorado', 'arquivos ignorados')}</summary><ul>${r.ignorados.slice(0, 300).map((i) => `<li>${esc(i.caminho)} — <i>${esc(i.motivo)}</i></li>`).join('')}${r.ignorados.length > 300 ? `<li>… e mais ${r.ignorados.length - 300}</li>` : ''}</ul></details>`);
+    }
+    if (r.ocultos) partes.push(`<p style="font-size:13px">${plural(r.ocultos, 'arquivo oculto/de sistema ignorado', 'arquivos ocultos/de sistema ignorados')} (ex.: __MACOSX).</p>`);
+    const semTocar = [...new Set((r.ignorados || []).filter((i) => EXT_NAO_TOCA.includes(i.ext)).map((i) => i.ext.toUpperCase()))];
+    if (semTocar.length) partes.push(`<div class="alerta"><b>${semTocar.join(', ')}</b> não ${semTocar.length > 1 ? 'tocam' : 'toca'} no iPhone. Converta para <b>MP4 (H.264 + AAC)</b> — por exemplo com o HandBrake, gratuito — e importe de novo.</div>`);
+    await dialogo({ titulo: r.cancelado ? 'Importação interrompida' : 'Importação concluída', html: partes.join('') });
+  }
+};
+
+async function menuImportar() {
+  if (importando) return;
+  if (!SUPORTE.pasta) { $('#inp-zip').click(); return; }
+  const escolha = await dialogo({
+    titulo: 'Importar curso',
+    html: `<div class="escolha">
+      <button data-valor="zip"><span>${ICONE.zip}</span><div><b>Arquivos .zip</b><small>Um zip por curso. Pode escolher vários.</small></div></button>
+      <button data-valor="pasta"><span>${ICONE.pasta}</span><div><b>Pasta</b><small>Uma pasta com os vídeos do curso.</small></div></button>
+    </div><p style="margin:14px 0 0;font-size:13px">Dica: você também pode arrastar os zips para esta janela.</p>`,
+    botoes: [{ rotulo: 'Cancelar', valor: null }]
+  });
+  if (escolha === 'zip') $('#inp-zip').click();
+  else if (escolha === 'pasta') $('#inp-pasta').click();
+}
+
+/* =========================================================
+   Ações de dados
+   ========================================================= */
+async function apagarCurso(id) {
+  const curso = await DB.get('cursos', id);
+  if (!curso) return;
+  const aulas = await DB.aulasDoCurso(id);
+  const tam = aulas.reduce((s, a) => s + (a.tamanho || 0), 0);
+  const ok = await confirmar('Apagar curso?', `<p>“${esc(curso.nome)}” será removido deste aparelho, com ${plural(aulas.length, 'episódio', 'episódios')} e o progresso. Isso libera <b>${fmtBytes(tam)}</b>.</p>`, 'Apagar curso', true);
+  if (!ok) return;
+  await DB.apagar(aulas.map((a) => a.id), id);
+  await OPFS.remover('cursos/' + id);
+  esquecerCapa(id); esquecerMinis(aulas.map((a) => a.id));
+  estadoCurso.delete(id);
+  toast('Curso apagado — ' + fmtBytes(tam) + ' liberados');
+  if (lerRota().rota === 'curso') location.replace('#/'); else rerenderizar();
+}
+
+async function renomearCurso(id) {
+  const curso = await DB.get('cursos', id);
+  if (!curso) return;
+  const m = abrirModal(`<h2>Renomear curso</h2>
+    <div class="modal-corpo">
+      <input id="novo-nome" class="campo" maxlength="80" value="${esc(curso.nome)}" autocomplete="off" enterkeyhint="done">
+      <p style="margin-top:10px;font-size:13px">Para levar o progresso para outro aparelho, use o mesmo nome lá.</p>
+    </div>
+    <div class="modal-botoes"><button class="btn btn-sec" data-r="0">Cancelar</button><button class="btn btn-primario" data-r="1">Salvar</button></div>`);
+  const campo = $('#novo-nome', m.el);
+  setTimeout(() => { campo.focus(); campo.select(); }, 50);
+  const salvar = async () => {
+    const nome = campo.value.replace(/\s+/g, ' ').trim();
+    if (!nome) { campo.focus(); return; }
+    m.fechar();
+    if (nome !== curso.nome) { curso.nome = nome; await DB.put('cursos', curso); toast('Curso renomeado'); rerenderizar(); }
+  };
+  m.el.addEventListener('click', (e) => { const b = e.target.closest('[data-r]'); if (!b) return; if (b.dataset.r === '1') salvar(); else m.fechar(); });
+  campo.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); salvar(); } });
+  m.fundo.addEventListener('fechar', () => m.fechar());
+}
+
+async function apagarModulo(cursoId, modulo) {
+  const todas = await DB.aulasDoCurso(cursoId);
+  const aulas = todas.filter((a) => a.modulo === modulo);
+  if (!aulas.length) return;
+  const tam = aulas.reduce((s, a) => s + (a.tamanho || 0), 0);
+  const ok = await confirmar('Apagar módulo?', `<p>O módulo “${esc(nomeModulo(modulo))}” (${plural(aulas.length, 'episódio', 'episódios')}) será removido deste aparelho. Isso libera <b>${fmtBytes(tam)}</b>.</p>`, 'Apagar módulo', true);
+  if (!ok) return;
+  const restantes = todas.length - aulas.length;
+  await DB.apagar(aulas.map((a) => a.id), restantes ? null : cursoId);
+  for (const a of aulas) await OPFS.remover(a.caminho);
+  esquecerMinis(aulas.map((a) => a.id));
+  toast('Módulo apagado — ' + fmtBytes(tam) + ' liberados');
+  if (!restantes) { await OPFS.remover('cursos/' + cursoId); esquecerCapa(cursoId); location.replace('#/'); }
+  else rerenderizar();
+}
+
+async function alternarConcluida(aulaId) {
+  if (Player.ativo && Player.aula?.id === aulaId) { await Player.alternarConcluida(); return; }
+  const p = (await DB.get('progresso', aulaId)) || { aulaId, posicao: 0, concluida: false };
+  p.concluida = !p.concluida;
+  p.atualizadoEm = Date.now();
+  await DB.put('progresso', p);
+  if (Player.ativo) Player.renderLista(); else rerenderizar();
+}
+
+async function exportarProgresso() {
+  const d = await carregarTudo();
+  const cursoPorId = new Map(d.cursos.map((c) => [c.id, c]));
+  const itens = [];
+  for (const p of d.prog.values()) {
+    const a = d.aulaMap.get(p.aulaId);
+    const c = a && cursoPorId.get(a.cursoId);
+    if (!c) continue;
+    itens.push({ curso: c.nome, caminho: a.origem, posicao: Math.round(p.posicao || 0), concluida: !!p.concluida, atualizadoEm: p.atualizadoEm || 0 });
+  }
+  const json = JSON.stringify({ app: APP, versao: 1, exportadoEm: new Date().toISOString(), itens }, null, 2);
+  const nome = `cursos-progresso-${new Date().toISOString().slice(0, 10)}.json`;
+  const arquivo = new File([json], nome, { type: 'application/json' });
+  // No iPhone, a folha de compartilhamento permite "Salvar em Arquivos"
+  if (matchMedia('(pointer: coarse)').matches && navigator.canShare?.({ files: [arquivo] })) {
+    try { await navigator.share({ files: [arquivo], title: 'Progresso · ' + APP }); return; }
+    catch (e) { if (e.name === 'AbortError') return; }
+  }
+  const url = URL.createObjectURL(arquivo);
+  const a = document.createElement('a');
+  a.href = url; a.download = nome;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  toast(`Progresso exportado (${plural(itens.length, 'aula', 'aulas')})`);
+}
+
+async function importarProgresso(file) {
+  let dados;
+  try { dados = JSON.parse(await file.text()); } catch (e) { toast('Arquivo JSON inválido'); return; }
+  if (!dados || !Array.isArray(dados.itens)) { toast('Este arquivo não é um progresso exportado por este app'); return; }
+  const d = await carregarTudo();
+  // Casa por nome do curso + caminho da aula
+  const chave = (curso, caminho) => curso.toLocaleLowerCase('pt-BR') + '\u0000' + caminho;
+  const cursoPorId = new Map(d.cursos.map((c) => [c.id, c]));
+  const mapa = new Map(d.aulas.map((a) => [chave(cursoPorId.get(a.cursoId)?.nome || '', a.origem), a]));
+  const novos = [];
+  let casados = 0;
+  for (const it of dados.itens) {
+    const a = mapa.get(chave(String(it.curso || ''), String(it.caminho || '')));
+    if (!a) continue;
+    casados++;
+    const atual = d.prog.get(a.id);
+    if (atual && (atual.atualizadoEm || 0) > (it.atualizadoEm || 0)) continue; // mantém o mais recente
+    novos.push({ aulaId: a.id, posicao: Number(it.posicao) || 0, concluida: !!it.concluida, atualizadoEm: Number(it.atualizadoEm) || Date.now(), duracao: atual?.duracao || a.duracao || undefined });
+  }
+  if (novos.length) await DB.putVarios('progresso', novos);
+  await dialogo({ titulo: 'Progresso importado', html: `<p>${casados} de ${dados.itens.length} aulas encontradas neste aparelho; ${novos.length} atualizadas.</p>${casados < dados.itens.length ? '<p>As demais são de cursos que ainda não foram importados aqui (o nome do zip precisa ser o mesmo).</p>' : ''}` });
+  rerenderizar();
+}
+
+async function apagarTudo() {
+  const ok = await confirmar('Apagar tudo?', '<p>Todos os cursos, vídeos e progresso serão removidos deste aparelho. Não dá para desfazer.</p>', 'Apagar tudo', true);
+  if (!ok) return;
+  const certeza = await confirmar('Tem certeza?', '<p>Última confirmação: apagar <b>todos</b> os dados?</p>', 'Sim, apagar tudo', true);
+  if (!certeza) return;
+  Player.sair();
+  Processador.fila = []; Processador.ids.clear();
+  await DB.limparTudo();
+  await OPFS.apagarTudo();
+  for (const id of [...urlsCapa.keys()]) esquecerCapa(id);
+  esquecerMinis([...urlsMini.keys()]);
+  estadoCurso.clear();
+  toast('Tudo apagado');
+  location.replace('#/');
+  rerenderizar();
+}
+
+/* =========================================================
+   Eventos globais
+   ========================================================= */
+document.addEventListener('click', async (e) => {
+  const el = e.target.closest('[data-acao]');
+  if (!el) return;
+  const acao = el.dataset.acao, id = el.dataset.id;
+  if (el.closest('summary')) e.preventDefault(); // botão no cabeçalho do módulo não abre/fecha
+  switch (acao) {
+    case 'importar': menuImportar(); break;
+    case 'voltar': voltar('#/'); break;
+    case 'abrir-curso': location.hash = '#/curso/' + encodeURIComponent(id); break;
+    case 'assistir':
+      if (Player.ativo) Player.irPara({ id });
+      else location.hash = '#/assistir/' + encodeURIComponent(id);
+      break;
+    case 'alternar-concluida': alternarConcluida(id); break;
+    case 'apagar-curso': apagarCurso(id); break;
+    case 'renomear-curso': renomearCurso(id); break;
+    case 'apagar-modulo': apagarModulo(id, decodeURIComponent(el.dataset.modulo)); break;
+    case 'filtro-bib': filtroBib = el.dataset.valor; rerenderizar(); break;
+    case 'filtro-ep': {
+      const est = estadoCurso.get(id);
+      if (est) est.filtro = el.dataset.valor;
+      $('.lista-eps').dataset.filtro = el.dataset.valor;
+      if (est && el.dataset.valor !== 'todas') $$('.modulo').forEach((d) => { d.open = true; est.abertos.add(d.dataset.modulo); });
+      $$('[data-acao="filtro-ep"]').forEach((c) => c.classList.toggle('ativo', c === el));
+      break;
+    }
+    case 'rolar': {
+      const f = el.parentElement.querySelector('.fileira');
+      f.scrollBy({ left: +el.dataset.dir * f.clientWidth * 0.85, behavior: 'smooth' });
+      break;
+    }
+    case 'persistir': {
+      let ok = false;
+      try { ok = await navigator.storage.persist(); } catch (x) {}
+      toast(ok ? 'Armazenamento persistente ativado' : 'O navegador não confirmou. No iPhone, instale o app na Tela de Início.');
+      rerenderizar();
+      break;
+    }
+    case 'exportar-progresso': exportarProgresso(); break;
+    case 'importar-progresso': $('#inp-json').click(); break;
+    case 'apagar-tudo': apagarTudo(); break;
+    // Player
+    case 'fechar-player': Player.fechar(); break;
+    case 'pl-voltar10': Player.pular(-10); break;
+    case 'pl-avancar10': Player.pular(10); break;
+    case 'pl-velocidade': Player.trocarVelocidade(); break;
+    case 'pl-anterior': Player.irPara(Player.vizinha(-1)); break;
+    case 'pl-proxima': Player.irPara(Player.vizinha(1)); break;
+    case 'pl-concluida': Player.alternarConcluida(); break;
+    case 'cont-agora': { const p = Player.vizinha(1); Player.pararContagem(); Player.irPara(p); break; }
+    case 'cont-cancelar': Player.pararContagem(); break;
+  }
+});
+
+$('#inp-zip').addEventListener('change', async (e) => {
+  const files = [...e.target.files];
+  e.target.value = '';
+  if (files.length) await Importador.deZips(files);
+});
+$('#inp-pasta').addEventListener('change', async (e) => {
+  const files = [...e.target.files];
+  e.target.value = '';
+  if (files.length) await Importador.dePasta(files);
+});
+$('#inp-json').addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  e.target.value = '';
+  if (f) await importarProgresso(f);
+});
+
+// Teclado (PC): ←/→ 10 s, espaço pausa, F tela cheia, N próximo, Esc fecha
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const fundos = $$('.modal-fundo');
+    const topo = fundos[fundos.length - 1];
+    if (topo) { if (topo._modal?.fechavel) topo.dispatchEvent(new Event('fechar')); return; }
+    if (Player.ativo && !document.fullscreenElement) { Player.fechar(); return; }
+  }
+  if (!Player.ativo || $('.modal-fundo') || e.target.closest('input, textarea, select') || e.metaKey || e.ctrlKey || e.altKey) return;
+  const v = Player.v;
+  if (e.key === 'ArrowLeft') { Player.pular(-10); e.preventDefault(); }
+  else if (e.key === 'ArrowRight') { Player.pular(10); e.preventDefault(); }
+  else if (e.key === ' ' || e.key === 'k') { if (e.target === v) return; v.paused ? v.play() : v.pause(); e.preventDefault(); }
+  else if (e.key === 'f' || e.key === 'F') { document.fullscreenElement ? document.exitFullscreen() : v.requestFullscreen?.(); }
+  else if (e.key === 'n' || e.key === 'N') Player.irPara(Player.vizinha(1));
+});
+
+// Arrastar e soltar zips (PC)
+let contadorArraste = 0;
+window.addEventListener('dragenter', (e) => {
+  if (!e.dataTransfer?.types?.includes('Files') || importando) return;
+  contadorArraste++;
+  if (!$('.soltar')) { const d = document.createElement('div'); d.className = 'soltar'; d.textContent = 'Solte os arquivos .zip para importar'; document.body.appendChild(d); }
+});
+window.addEventListener('dragleave', () => { if (--contadorArraste <= 0) { contadorArraste = 0; $('.soltar')?.remove(); } });
+window.addEventListener('dragover', (e) => { if (e.dataTransfer?.types?.includes('Files')) e.preventDefault(); });
+window.addEventListener('drop', (e) => {
+  e.preventDefault();
+  contadorArraste = 0; $('.soltar')?.remove();
+  if (importando) return;
+  const zips = [...(e.dataTransfer?.files || [])].filter((f) => /\.zip$/i.test(f.name));
+  if (zips.length) Importador.deZips(zips); else toast('Solte arquivos .zip');
+});
+
+window.addEventListener('beforeunload', (e) => { if (importando) { e.preventDefault(); e.returnValue = ''; } });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) Processador.rodar(); });
+
+/* =========================================================
+   Inicialização
+   ========================================================= */
+$$('[data-icone]').forEach((el) => el.insertAdjacentHTML('afterbegin', ICONE[el.dataset.icone]));
+Player.init();
+
+// Migração: títulos de aulas importadas antes da limpeza dos números ("2_Conhecendo..." → "Conhecendo...")
+async function migrarDados() {
+  if (lerPref('versaoDados', 1) >= 2) return;
+  const aulas = await DB.todos('aulas');
+  for (const a of aulas) {
+    const partes = a.origem.split('/');
+    a.titulo = [...partes.slice(1, -1), limparTitulo(partes[partes.length - 1])].join(' › ');
+  }
+  if (aulas.length) await DB.putVarios('aulas', aulas);
+  salvarPref('versaoDados', 2);
+}
+
+DB.abrir().then(() => migrarDados().catch(() => {})).then(() => rotear()).catch((err) => {
+  app.innerHTML = `<div class="pagina"><h1 class="pagina-titulo">Erro ao abrir o banco de dados</h1><p>${esc(err?.message || err)}</p><p>Se estiver em aba anônima/privada, abra em uma aba normal.</p></div>`;
+});
+
+// Instalado como app: pede armazenamento persistente logo de cara (o sistema não apaga os vídeos)
+if (SUPORTE.instalado && navigator.storage?.persist) navigator.storage.persist().catch(() => {});
+
+if ('serviceWorker' in navigator && window.isSecureContext) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch((e) => console.warn('SW:', e)));
+}
+
+// Exposto só para depuração no console
+window.App = { DB, OPFS, ZIP, planejar, Importador, Player, Processador };
+</script>
+</body>
+</html>
